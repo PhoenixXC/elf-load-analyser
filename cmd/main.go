@@ -2,44 +2,63 @@ package main
 
 import (
     "flag"
+    "github.com/phoenixxc/elf-load-analyser/pkg/bcc"
+    "github.com/phoenixxc/elf-load-analyser/pkg/factory"
+    _ "github.com/phoenixxc/elf-load-analyser/pkg/modules"
+    "github.com/phoenixxc/elf-load-analyser/pkg/system"
+
     "log"
     "os"
     "path/filepath"
-    "syscall"
-    
-    "github.com/phoenixxc/elf-load-analyser/pkg/system/env"
+    "time"
+
+    "golang.org/x/sys/unix"
 )
 
 var (
-    execPath string // exec file path
+    execPath   string // exec file path
+    execArgStr string // exec args
 )
 
 func init() {
-    flag.StringVar(&execPath, "e", "", "the analyse program")
-    
+    flag.StringVar(&execPath, "e", "", "the analyse program path")
+    flag.StringVar(&execArgStr, "p", "", "the analyse program parameter, split by space")
+
     flag.Parse()
 }
 
 func main() {
-    // check flag
+    // child
+    transExecPath, isChild := os.LookupEnv(ChildFlagEnv)
+    if isChild {
+        childProcess(transExecPath)
+    }
+
+    // handle flag
     checkFlag()
-    
+
     // system, kernel version, kernel config and depend software check
-    env.CheckEnv()
-    
+    system.CheckEnv()
+
     // fork, get pid, block until receive signal
-    // inject env for child progress
-    
+    childPID := buildProcess(execArgStr)
+
     // bcc handler update, hook pid, load modules, begin hook
-    
-    // exec binary
-    
+    factory.LoadMonitors(bcc.Context{
+        Pid: childPID,
+    })
+
+    // wake up chile to exec binary
+    wakeChild(childPID)
+
     // cache load detail data, render use html(use graphviz build images, if no graphviz, show code use <code> tag)
-    
-    // save html to disk
-    
+
+    // when load ok, save html to disk
+
     // optional: start web server show message
-    
+
+    // optional: start to monitor dynamic link at real time, use websocket
+    time.Sleep(1 * time.Hour)
 }
 
 func checkFlag() {
@@ -53,7 +72,8 @@ func checkFlag() {
         log.Fatalf("Get absolute path error, %v", err)
     }
     execPath = absPath
-    if err := syscall.Access(execPath, syscall.O_EXCL & syscall.F_OK); err != nil {
-        log.Fatalf("Exec %q not exist or no executable perm, %v", execPath, err)
+
+    if err := unix.Access(execPath, unix.X_OK); err != nil {
+        log.Fatalf("Check %q error, %v", execPath, err)
     }
 }

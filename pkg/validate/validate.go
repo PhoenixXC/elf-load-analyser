@@ -44,9 +44,9 @@ func getValue(val interface{}) interface{} {
     if isNotFunc(val) {
         return val
     }
-    switch val.(type) {
+    switch val := val.(type) {
     case func() interface{}:
-        return val.(func() interface{})()
+        return val()
     default:
         panic(fmt.Sprintf("argument %T should be normal value or func() interface{} type", val))
     }
