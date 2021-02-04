@@ -2,6 +2,7 @@ package bcc
 
 import (
     bpf "github.com/iovisor/gobpf/bcc"
+    "github.com/phoenixxc/elf-load-analyser/pkg/data"
     "github.com/phoenixxc/elf-load-analyser/pkg/system"
     "log"
     "strconv"
@@ -23,11 +24,6 @@ type action interface {
     Attach(m *bpf.Module, fd int) error
     // Loader load symbol
     Load(m *bpf.Module) (int, error)
-}
-
-// PidTrigger 接收到子进程 pid 后的触发器
-type PidTrigger interface {
-    TouchOff(pid int) error
 }
 
 type RegisterHandler interface {
@@ -53,15 +49,16 @@ func (e *Event) WithHandle(handle RegisterHandler) {
 
 type Monitor struct {
     isInit bool
-    PidTrigger
     event2Action map[*Event]*action
-    Source  string // 模块源
-    CFlags  []string
-    Resolve func(m *bpf.Module)
+    Name         string
+    Source       string // 模块源
+    CFlags       []string
+    Resolve      func(m *bpf.Module, send chan<- data.AnalyseData, stop func())
 }
 
-func NewMonitor(source string, cFlags []string, resolve func(m *bpf.Module)) *Monitor {
-    return &Monitor{Source: source, CFlags: cFlags, Resolve: resolve}
+func NewMonitor(name string, source string, cFlags []string,
+    resolve func(m *bpf.Module, ch chan<- data.AnalyseData, stop func())) *Monitor {
+    return &Monitor{Name: name, Source: source, CFlags: cFlags, Resolve: resolve}
 }
 
 // init 创建 bpf 模块
@@ -113,6 +110,3 @@ func (m *Monitor) DoAction() (*bpf.Module, bool) {
     }
     return module, goOn
 }
-
-// 数据处理 json 格式输出 时间戳 + 类型 + 符号 + 函数名 + 数据内容
-// TODO 数据处理 协程控制

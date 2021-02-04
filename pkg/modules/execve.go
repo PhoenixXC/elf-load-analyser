@@ -3,6 +3,7 @@ package modules
 import (
     "fmt"
     bpf "github.com/iovisor/gobpf/bcc"
+    "github.com/phoenixxc/elf-load-analyser/pkg/data"
     "time"
 
     "github.com/phoenixxc/elf-load-analyser/pkg/bcc"
@@ -27,11 +28,12 @@ int kprobe__do_execveat_common(struct pt_regs* ctx, int fd, struct filename* fil
 `
 
 func init() {
-    m := bcc.NewMonitor(source, []string{}, func(m *bpf.Module) {
-        time.Sleep(20 * time.Second)
-        fmt.Println("Do something, resolve data and send result....")
-    })
+    m := bcc.NewMonitor("hook_execveat", source, []string{},
+        func(m *bpf.Module, ch chan<- data.AnalyseData, handle func()) {
+            time.Sleep(20 * time.Second)
+            fmt.Println("Do something, resolve data and send result....")
+        })
     e := bcc.NewKprobeEvent("kprobe__do_execveat_common", "do_execveat_common", -1)
     m.AddEvent(e)
-    factory.Register("execve_handle", m)
+    factory.Register(m)
 }

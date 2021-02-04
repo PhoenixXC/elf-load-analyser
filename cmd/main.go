@@ -4,7 +4,7 @@ import (
     "flag"
     "github.com/phoenixxc/elf-load-analyser/pkg/bcc"
     "github.com/phoenixxc/elf-load-analyser/pkg/factory"
-    _ "github.com/phoenixxc/elf-load-analyser/pkg/modules"
+    _ "github.com/phoenixxc/elf-load-analyser/pkg/modules" // use side effect load modules
     "github.com/phoenixxc/elf-load-analyser/pkg/system"
 
     "log"
@@ -44,20 +44,23 @@ func main() {
     childPID := buildProcess(execArgStr)
 
     // bcc handler update, hook pid, load modules, begin hook
-    factory.LoadMonitors(bcc.Context{
-        Pid: childPID,
-    })
+    ctr := make(chan struct{})
+    factory.LoadMonitors(bcc.Context{Pid: childPID}, ctr)
 
     // wake up chile to exec binary
     wakeChild(childPID)
 
-    // cache load detail data, render use html(use graphviz build images, if no graphviz, show code use <code> tag)
+    // wait until data collection ok
+    <-ctr
 
-    // when load ok, save html to disk
+    // cache load detail data, render use html(use graphviz build images, if no graphviz, show code use <code> tag)
+    // save html to disk
+    // render data result
 
     // optional: start web server show message
 
     // optional: start to monitor dynamic link at real time, use websocket
+    // if start web server, wait server exit, if not, save html and exit
     time.Sleep(1 * time.Hour)
 }
 
