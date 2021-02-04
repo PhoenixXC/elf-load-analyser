@@ -15,8 +15,6 @@ func (p *Pool) Chan() chan<- AnalyseData {
 }
 
 func (p *Pool) Data() []AnalyseData {
-    // 当收集进程中止才可以获取数据，提前获取意义不大
-    // TODO 实时获取数据，添加分页支持，需要注意线程安全
     <-p.exit
     return p.data
 }

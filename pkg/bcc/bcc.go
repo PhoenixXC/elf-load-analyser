@@ -48,21 +48,30 @@ func (e *Event) WithHandle(handle RegisterHandler) {
 }
 
 type Monitor struct {
-    isInit bool
+    isInit       bool
+    isEnd        bool // end monitor level
     event2Action map[*Event]*action
     Name         string
     Source       string // 模块源
     CFlags       []string
-    Resolve      func(m *bpf.Module, send chan<- data.AnalyseData, stop func())
+    Resolve      func(m *bpf.Module, send chan<- data.AnalyseData)
+}
+
+func (m *Monitor) IsEnd() bool {
+    return m.isEnd
+}
+
+func (m *Monitor) SetEnd() {
+    m.isEnd = true
 }
 
 func NewMonitor(name string, source string, cFlags []string,
-    resolve func(m *bpf.Module, ch chan<- data.AnalyseData, stop func())) *Monitor {
-    return &Monitor{Name: name, Source: source, CFlags: cFlags, Resolve: resolve}
+    resolve func(m *bpf.Module, ch chan<- data.AnalyseData)) *Monitor {
+    return &Monitor{Name: name, Source: source, CFlags: cFlags, Resolve: resolve, isEnd: false}
 }
 
-// init 创建 bpf 模块
-func (m *Monitor) init() *bpf.Module {
+// initialize 创建 bpf 模块
+func (m *Monitor) initialize() *bpf.Module {
     m.isInit = true
     return bpf.NewModule(m.Source, m.CFlags)
 }
@@ -77,12 +86,13 @@ func (m *Monitor) TouchOff(pid int) error {
 func (m *Monitor) AddEvent(event *Event) *Monitor {
     // do pre Handle
     if event.RegisterHandler != nil {
-        con, err := event.RegisterHandler.Handle()
+        goOn, err := event.RegisterHandler.Handle()
         if err != nil {
             log.Printf(system.Error("Failed to register [%v] event, %v\n"), *event, err)
         }
-        if !con {
+        if !goOn {
             log.Printf(system.Warn("Ignore register [%v] event"), *event)
+            return m
         }
     }
 
@@ -93,8 +103,9 @@ func (m *Monitor) AddEvent(event *Event) *Monitor {
     return m
 }
 
+// DoAction 执行 attach operation 操作
 func (m *Monitor) DoAction() (*bpf.Module, bool) {
-    module := m.init()
+    module := m.initialize()
     goOn := false
     for event, action := range m.event2Action {
         fd, err := (*action).Load(module)

@@ -29,11 +29,11 @@ int kprobe__do_execveat_common(struct pt_regs* ctx, int fd, struct filename* fil
 
 func init() {
     m := bcc.NewMonitor("hook_execveat", source, []string{},
-        func(m *bpf.Module, ch chan<- data.AnalyseData, handle func()) {
+        func(m *bpf.Module, ch chan<- data.AnalyseData) {
             time.Sleep(20 * time.Second)
             fmt.Println("Do something, resolve data and send result....")
         })
     e := bcc.NewKprobeEvent("kprobe__do_execveat_common", "do_execveat_common", -1)
-    m.AddEvent(e)
+    m.AddEvent(e).SetEnd()
     factory.Register(m)
 }
