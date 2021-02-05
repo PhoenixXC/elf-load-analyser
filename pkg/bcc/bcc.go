@@ -54,7 +54,7 @@ type Monitor struct {
     Name         string
     Source       string // 模块源
     CFlags       []string
-    Resolve      func(m *bpf.Module, send chan<- data.AnalyseData)
+    Resolve      func(m *bpf.Module, send chan<- data.AnalyseData, ready chan<- struct{}, ok <-chan struct {})
 }
 
 func (m *Monitor) IsEnd() bool {
@@ -66,7 +66,7 @@ func (m *Monitor) SetEnd() {
 }
 
 func NewMonitor(name string, source string, cFlags []string,
-    resolve func(m *bpf.Module, ch chan<- data.AnalyseData)) *Monitor {
+    resolve func(m *bpf.Module, ch chan<- data.AnalyseData, ready chan<- struct{}, ok <-chan struct {})) *Monitor {
     return &Monitor{Name: name, Source: source, CFlags: cFlags, Resolve: resolve, isEnd: false}
 }
 

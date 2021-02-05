@@ -53,7 +53,7 @@ func buildProcess(execArgStr string) int {
         log.Fatalf("Create process failed, %v\n", err)
     }
 
-    log.Printf("Create child process %d success\n", childPID)
+    log.Printf("Create child process %d, parent: %d success\n", childPID, os.Getppid())
     return childPID
 }
 

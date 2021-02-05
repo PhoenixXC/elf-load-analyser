@@ -1,5 +1,7 @@
 package data
 
+import "fmt"
+
 type Pool struct {
     ch   chan AnalyseData
     exit chan struct{}
@@ -26,11 +28,16 @@ func (p *Pool) Close() {
 
 func (p *Pool) Init() {
     go func() {
+    loop:
         for {
             select {
             case <-p.exit:
-                break
-            case data := <-p.ch:
+                break loop
+            case data, ok := <-p.ch:
+                if !ok {
+                    break loop
+                }
+                fmt.Println("Receive data", data)
                 p.data = append(p.data, data)
             }
         }

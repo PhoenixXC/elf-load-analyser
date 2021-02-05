@@ -1,7 +1,6 @@
 package main
 
 import (
-    "encoding/json"
     "flag"
     "fmt"
     "github.com/phoenixxc/elf-load-analyser/pkg/bcc"
@@ -9,12 +8,10 @@ import (
     _ "github.com/phoenixxc/elf-load-analyser/pkg/modules" // use side effect load modules
     "github.com/phoenixxc/elf-load-analyser/pkg/system"
 
+    "golang.org/x/sys/unix"
     "log"
     "os"
     "path/filepath"
-    "time"
-
-    "golang.org/x/sys/unix"
 )
 
 var (
@@ -46,16 +43,19 @@ func main() {
     childPID := buildProcess(execArgStr)
 
     // bcc handler update, hook pid, load modules, begin hook
-    ctr := make(chan struct{})
-    pool := factory.LoadMonitors(bcc.Context{Pid: childPID}, ctr)
+    ok := make(chan struct{})
+    pool := factory.LoadMonitors(bcc.Context{Pid: childPID}, ok)
+    fmt.Println("All monitor ready..")
 
     // wake up chile to exec binary
     wakeChild(childPID)
 
     // wait until data collection ok
-    <-ctr
-    d,_ := json.Marshal(pool.Data())
-    fmt.Println(string(d))
+    <-ok
+    data := pool.Data()
+    for _, analyseData := range data {
+        fmt.Println(analyseData)
+    }
 
     // cache load detail data, render use html(use graphviz build images, if no graphviz, show code use <code> tag)
     // save html to disk
@@ -65,7 +65,7 @@ func main() {
 
     // optional: start to monitor dynamic link at real time, use websocket
     // if start web server, wait server exit, if not, save html and exit
-    time.Sleep(1 * time.Hour)
+    //time.Sleep(1 * time.Hour)
 }
 
 func checkFlag() {
