@@ -33,9 +33,9 @@ type AnalyseData struct {
     data    string    // data by json
 }
 
-func NewAnalyseData(name string, data ...Data) *AnalyseData {
+func NewAnalyseData(name string, data *Data) *AnalyseData {
     jsonData := "{}"
-    byteData, err := json.Marshal(data)
+    byteData, err := json.Marshal(*data)
     if err != nil {
         log.Printf(system.Error("Convert %v to Json error, %v\n"), data, err)
     } else {

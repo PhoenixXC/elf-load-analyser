@@ -17,8 +17,6 @@ func Register(monitor *bcc.Monitor) {
 
 // LoadMonitors ctx The run context, ctr control the process when to stop
 func LoadMonitors(ctx bcc.Context, ok chan struct{}) *data.Pool {
-    log.Printf("Load monitor...")
-
     ready := make(chan struct{})
     p := data.NewPool()
     ch := p.Chan()
@@ -30,6 +28,7 @@ func LoadMonitors(ctx bcc.Context, ok chan struct{}) *data.Pool {
         p.Close()
     }()
 
+    log.Println("Start load monitor....")
     cnt := 0
     for _, monitor := range factory {
         _ = monitor.TouchOff(ctx.Pid)
@@ -37,6 +36,7 @@ func LoadMonitors(ctx bcc.Context, ok chan struct{}) *data.Pool {
         if g {
             cnt++
             go func() {
+                log.Printf("Monitor %s start to resolve...\n", monitor.Name)
                 monitor.Resolve(m, ch, ready, ok)
                 if monitor.IsEnd() {
                     close(ok)
@@ -49,6 +49,7 @@ func LoadMonitors(ctx bcc.Context, ok chan struct{}) *data.Pool {
     for ; cnt > 0; cnt-- {
         <-ready
     }
+    log.Println("Start load monitor ok")
 
     return p
 }

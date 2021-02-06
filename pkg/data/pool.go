@@ -1,22 +1,20 @@
 package data
 
-import "fmt"
-
 type Pool struct {
-    ch   chan AnalyseData
+    ch   chan *AnalyseData
     exit chan struct{}
-    data []AnalyseData
+    data []*AnalyseData
 }
 
 func NewPool() *Pool {
-    return &Pool{ch: make(chan AnalyseData), exit: make(chan struct{}), data: make([]AnalyseData, 0)}
+    return &Pool{ch: make(chan *AnalyseData), exit: make(chan struct{}), data: make([]*AnalyseData, 0)}
 }
 
-func (p *Pool) Chan() chan<- AnalyseData {
+func (p *Pool) Chan() chan<- *AnalyseData {
     return p.ch
 }
 
-func (p *Pool) Data() []AnalyseData {
+func (p *Pool) Data() []*AnalyseData {
     <-p.exit
     return p.data
 }
@@ -37,7 +35,6 @@ func (p *Pool) Init() {
                 if !ok {
                     break loop
                 }
-                fmt.Println("Receive data", data)
                 p.data = append(p.data, data)
             }
         }

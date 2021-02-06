@@ -35,7 +35,6 @@ func main() {
 
     // handle flag
     checkFlag()
-
     // system, kernel version, kernel config and depend software check
     system.CheckEnv()
 
@@ -45,7 +44,6 @@ func main() {
     // bcc handler update, hook pid, load modules, begin hook
     ok := make(chan struct{})
     pool := factory.LoadMonitors(bcc.Context{Pid: childPID}, ok)
-    fmt.Println("All monitor ready..")
 
     // wake up chile to exec binary
     wakeChild(childPID)
@@ -54,6 +52,7 @@ func main() {
     <-ok
     data := pool.Data()
     for _, analyseData := range data {
+        // Just for debug
         fmt.Println(analyseData)
     }
 
