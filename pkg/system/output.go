@@ -20,7 +20,7 @@ func Success(message string) string {
 }
 
 func Error(message string) string {
-	return error("ERROR " + message)
+	return err("ERROR " + message)
 }
 
 func Check(message string, ok bool) string {
@@ -28,7 +28,7 @@ func Check(message string, ok bool) string {
 	if ok {
 		prefix = success(successFlag)
 	} else {
-		prefix = error(failFlag)
+		prefix = err(failFlag)
 	}
 	return prefix + " " + message
 }
@@ -41,6 +41,6 @@ func success(message string) string {
 	return "\033[1;32m" + message + "\033[0m"
 }
 
-func error(message string) string {
+func err(message string) string {
 	return "\033[1;31m" + message + "\033[0m"
 }

@@ -44,7 +44,7 @@ func GetKernelConfigs() map[string]bool {
 
 	reader, err := gzip.NewReader(file)
 	if err != nil {
-		log.Fatalf("Reset file %q error, %v", kernelConfigGzFile, err)
+		log.Fatalf("Reset file %q err, %v", kernelConfigGzFile, err)
 	}
 	//goland:noinspection GoUnhandledErrorResult
 	defer reader.Close()

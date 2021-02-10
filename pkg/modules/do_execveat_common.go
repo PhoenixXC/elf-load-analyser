@@ -1,19 +1,16 @@
 package modules
 
 import (
-    "bytes"
-    "encoding/binary"
     "fmt"
     bpf "github.com/iovisor/gobpf/bcc"
     "github.com/phoenixxc/elf-load-analyser/pkg/bcc"
     "github.com/phoenixxc/elf-load-analyser/pkg/data"
-    "github.com/phoenixxc/elf-load-analyser/pkg/factory"
     "github.com/phoenixxc/elf-load-analyser/pkg/system"
     "log"
 )
 
 //goland:noinspection ALL
-const source = `
+const doExecveatCommonSource = `
 #include <linux/fs.h>
 #include <linux/sched.h>
 
@@ -51,20 +48,41 @@ type execEvent struct {
     Filename [256]byte
 }
 
-func init() {
-    m := bcc.NewMonitor(monitorName, source, []string{}, resolve)
-    e := bcc.NewKprobeEvent("kprobe__do_execveat_common", "do_execveat_common", -1)
-    m.AddEvent(e).SetEnd()
-    factory.Register(m)
+func (e *execEvent) Render() *data.AnalyseData {
+    s := bytes2Str(e.Filename[:])
+    msg := fmt.Sprintf("Do `%s` function, with fd = %d, flags = %d, filename = %s\n",
+        "do_execveat_common", e.Fd, e.Flags, s)
+    return data.NewAnalyseData(monitorName, data.NewData(data.MarkdownType, msg))
 }
 
-func resolve(m *bpf.Module, ch chan<- *data.AnalyseData, ready chan<- struct{}, _ <-chan struct{}) {
+type doExecveatCommon struct {
+    *BaseMonitorModule
+}
+
+func init() {
+    ModuleInit(&doExecveatCommon{}, true)
+}
+
+func (c *doExecveatCommon) Monitor() string {
+    return "hook_execveat"
+}
+
+func (c *doExecveatCommon) Source() string {
+    return doExecveatCommonSource
+}
+
+func (c *doExecveatCommon) Events() []*bcc.Event {
+    ke := bcc.NewKprobeEvent("kprobe__do_execveat_common", "do_execveat_common", -1)
+    return []*bcc.Event{ke}
+}
+
+func (c *doExecveatCommon) Resolve(m *bpf.Module, ch chan<- *data.AnalyseData, ready chan<- struct{}, stop <-chan struct{}) {
     table := bpf.NewTable(m.TableId("events"), m)
 
     channel := make(chan []byte)
     perMap, err := bpf.InitPerfMap(table, channel, nil)
     if err != nil {
-        log.Fatalf(system.Error("(%s, %s) Failed to init perf map: %v\n"), "hook_execveat", "events", err)
+        log.Fatalf(system.Error("(%s, %s) Failed to init perf map: %v\n"), c.Monitor(), "events", err)
     }
 
     ok := make(chan []struct{})
@@ -73,17 +91,12 @@ func resolve(m *bpf.Module, ch chan<- *data.AnalyseData, ready chan<- struct{}, 
         for {
             select {
             case d := <-channel:
-                var event execEvent
-                err := binary.Read(bytes.NewBuffer(d), binary.LittleEndian, &event)
+                analyseData, err := c.Render(d, &execEvent{})
                 if err != nil {
-                    fmt.Printf(system.Error("(%s, %s) Failed to decode received d: %v\n"),
-                        "hook_execveat", "events", err)
+                    fmt.Println(err)
+                } else {
+                    ch <- analyseData
                 }
-                s := bytes2Str(event.Filename[:])
-                msg := fmt.Sprintf("Do `%s` function, with fd = %d, flags = %d, filename = %s\n",
-                    "do_execveat_common", event.Fd, event.Flags, s)
-                analyseData := data.NewAnalyseData(monitorName, data.NewData(data.MarkdownType, msg))
-                ch <- analyseData
                 // only once
                 return
             case ready <- struct{}{}:
