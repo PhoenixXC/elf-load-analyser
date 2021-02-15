@@ -8,7 +8,8 @@ import (
     "github.com/phoenixxc/elf-load-analyser/pkg/validate"
 )
 
-// requiredConfigs kernel required configuration, see https://github.com/iovisor/bcc/blob/master/INSTALL.md#kernel-configuration
+// requiredConfigs kernel required configuration,
+// see https://github.com/iovisor/bcc/blob/master/INSTALL.md#kernel-configuration
 var requiredConfigs = []string{
     "CONFIG_BPF",
     "CONFIG_BPF_SYSCALL",
@@ -66,7 +67,6 @@ for more information, see "https://github.com/iovisor/bcc/blob/master/INSTALL.md
 `)
 
     // Check if bcc is installed
-
     log.Printf(Emphasize("The program depend on bcc, please make sure you had install bcc, "+
         "for more information, see %q\n"), "https://github.com/iovisor/bcc/blob/master/INSTALL.md")
     binary, lookErr := exec.LookPath("bcc")

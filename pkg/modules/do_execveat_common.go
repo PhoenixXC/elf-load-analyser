@@ -60,7 +60,7 @@ type doExecveatCommon struct {
 }
 
 func init() {
-    ModuleInit(&doExecveatCommon{}, true)
+    //ModuleInit(&doExecveatCommon{}, false)
 }
 
 func (c *doExecveatCommon) Monitor() string {
@@ -76,7 +76,7 @@ func (c *doExecveatCommon) Events() []*bcc.Event {
     return []*bcc.Event{ke}
 }
 
-func (c *doExecveatCommon) Resolve(m *bpf.Module, ch chan<- *data.AnalyseData, ready chan<- struct{}, stop <-chan struct{}) {
+func (c *doExecveatCommon) Resolve(m *bpf.Module, ch chan<- *data.AnalyseData, ready chan<- struct{}, _ <-chan struct{}) {
     table := bpf.NewTable(m.TableId("events"), m)
 
     channel := make(chan []byte)
