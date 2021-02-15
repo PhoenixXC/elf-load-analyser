@@ -7,18 +7,20 @@ import (
     "time"
 )
 
+type Type int8
+
 const (
-    MarkdownType = iota
+    MarkdownType = Type(iota)
     GraphvizType
 )
 
 type Data struct {
-    Class int // Data type, MarkdownType or GraphvizType
+    Class Type // Data type, MarkdownType or GraphvizType
     Data  string
     Style string // css style
 }
 
-func NewData(class int, data string) *Data {
+func NewData(class Type, data string) *Data {
     return &Data{Class: class, Data: data}
 }
 
@@ -30,7 +32,15 @@ type AnalyseData struct {
     success bool
     now     time.Time // time
     name    string    // event name
-    data    string    // data by json
+    data    string    // data
+}
+
+func (a *AnalyseData) Name() string {
+    return a.name
+}
+
+func (a *AnalyseData) Data() string {
+    return a.data
 }
 
 func NewAnalyseData(name string, data *Data) *AnalyseData {
