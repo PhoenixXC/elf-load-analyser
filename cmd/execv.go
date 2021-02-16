@@ -14,6 +14,12 @@ const (
     ChildArgsFlag = "_ARGS_51cee58d2009745b72acb79005a881e4"
 )
 
+type execCtx struct {
+    execArgs string
+    uid int
+    gid int
+}
+
 func childProcess(execPath string) {
     // wait until parent load bcc modules ok
     startSignals := make(chan os.Signal, 1)
@@ -32,19 +38,26 @@ func childProcess(execPath string) {
     os.Exit(0)
 }
 
-func buildProcess(execArgStr string) int {
+func buildProcess(ctx execCtx) int {
+    execArgs := ctx.execArgs
+    uid, gid := ctx.uid, ctx.gid
+
     args := os.Args
     pwd, err := os.Getwd()
     if err != nil {
         log.Fatalf("Get pwd error, %v", err)
     }
     childEnvItem := fmt.Sprintf("%s=%s", ChildFlagEnv, execPath)
-    childArgItem := fmt.Sprintf("%s=%s", ChildArgsFlag, strings.TrimSpace(execArgStr))
+    childArgItem := fmt.Sprintf("%s=%s", ChildArgsFlag, strings.TrimSpace(execArgs))
     childPID, err := syscall.ForkExec(args[0], args, &syscall.ProcAttr{
         Dir: pwd,
         Env: append(os.Environ(), childEnvItem, childArgItem),
         Sys: &syscall.SysProcAttr{
             Setsid: true,
+            Credential: &syscall.Credential{
+                Uid: uint32(uid),
+                Gid: uint32(gid),
+            },
         },
         // TODO 重定向输入输出
         Files: []uintptr{0, 1, 2},

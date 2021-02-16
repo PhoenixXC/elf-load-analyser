@@ -7,6 +7,9 @@ import (
     "github.com/phoenixxc/elf-load-analyser/pkg/factory"
     _ "github.com/phoenixxc/elf-load-analyser/pkg/modules" // use side effect load modules
     "github.com/phoenixxc/elf-load-analyser/pkg/system"
+    "os/user"
+    "strconv"
+    "strings"
 
     "golang.org/x/sys/unix"
     "log"
@@ -17,11 +20,13 @@ import (
 var (
     execPath   string // exec file path
     execArgStr string // exec args
+    execUser   string // exec user
 )
 
 func init() {
     flag.StringVar(&execPath, "e", "", "the analyse program path")
     flag.StringVar(&execArgStr, "p", "", "the analyse program parameter, split by space")
+    flag.StringVar(&execUser, "u", "", "the analyse program run user")
 
     flag.Parse()
 }
@@ -33,13 +38,16 @@ func main() {
         childProcess(transExecPath)
     }
 
-    // handle flag
     checkFlag()
-    // system, kernel version, kernel config and depend software check
+    u, g := getUidGid(execUser)
     system.CheckEnv()
 
     // fork, get pid, block until receive signal
-    childPID := buildProcess(execArgStr)
+    childPID := buildProcess(execCtx{
+        execArgs: execArgStr,
+        uid:      u,
+        gid:      g,
+    })
 
     // bcc handler update, hook pid, load modules, begin hook
     ok := make(chan struct{})
@@ -68,7 +76,6 @@ func main() {
 }
 
 func checkFlag() {
-    // -e
     if len(execPath) == 0 {
         flag.Usage()
         os.Exit(1)
@@ -82,4 +89,20 @@ func checkFlag() {
     if err := unix.Access(execPath, unix.X_OK); err != nil {
         log.Fatalf("Check %q error, %v", execPath, err)
     }
+}
+
+func getUidGid(username string) (uid, gid int) {
+    s := strings.TrimSpace(username)
+    if len(s) != 0 {
+        u, err := user.Lookup(s)
+        if err == nil {
+            uid, _ := strconv.Atoi(u.Uid)
+            gid, _ := strconv.Atoi(u.Gid)
+            return uid, gid
+        }
+        fmt.Println("Invalid user")
+    }
+    flag.Usage()
+    os.Exit(1)
+    return
 }
