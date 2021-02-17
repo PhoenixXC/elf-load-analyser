@@ -51,5 +51,5 @@ func NewAnalyseData(name string, data *Data) *AnalyseData {
     } else {
         jsonData = string(byteData[:])
     }
-    return &AnalyseData{name: name, success: err != nil, data: jsonData, now: time.Now()}
+    return &AnalyseData{name: name, success: err == nil, data: jsonData, now: time.Now()}
 }
