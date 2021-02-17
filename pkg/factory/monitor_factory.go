@@ -31,6 +31,7 @@ func LoadMonitors(ctx bcc.Context, ok chan struct{}) *data.Pool {
     log.Println("Start load monitor....")
     cnt := 0
     for _, monitor := range factory {
+        monitor := monitor
         _ = monitor.TouchOff(ctx.Pid)
         m, g := monitor.DoAction()
         if g {
