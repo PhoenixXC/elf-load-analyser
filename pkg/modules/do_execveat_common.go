@@ -2,11 +2,8 @@ package modules
 
 import (
     "fmt"
-    bpf "github.com/iovisor/gobpf/bcc"
     "github.com/phoenixxc/elf-load-analyser/pkg/bcc"
     "github.com/phoenixxc/elf-load-analyser/pkg/data"
-    "github.com/phoenixxc/elf-load-analyser/pkg/system"
-    "log"
 )
 
 //goland:noinspection ALL
@@ -60,7 +57,11 @@ type doExecveatCommon struct {
 }
 
 func init() {
-    //ModuleInit(&doExecveatCommon{}, false)
+    m := NewPerfResolveMonitorModule(&doExecveatCommon{})
+    m.RegisterTable("events", false, func(data []byte) (*data.AnalyseData, error) {
+        return m.Render(data, &execEvent{})
+    })
+    ModuleInit(m, false)
 }
 
 func (c *doExecveatCommon) Monitor() string {
@@ -74,41 +75,4 @@ func (c *doExecveatCommon) Source() string {
 func (c *doExecveatCommon) Events() []*bcc.Event {
     ke := bcc.NewKprobeEvent("kprobe__do_execveat_common", "do_execveat_common", -1)
     return []*bcc.Event{ke}
-}
-
-func (c *doExecveatCommon) Resolve(m *bpf.Module, ch chan<- *data.AnalyseData, ready chan<- struct{}, _ <-chan struct{}) {
-    table := bpf.NewTable(m.TableId("events"), m)
-
-    channel := make(chan []byte)
-    perMap, err := bpf.InitPerfMap(table, channel, nil)
-    if err != nil {
-        log.Fatalf(system.Error("(%s, %s) Failed to init perf map: %v\n"), c.Monitor(), "events", err)
-    }
-
-    ok := make(chan []struct{})
-    go func() {
-        defer func() { close(ok) }()
-        for {
-            select {
-            case d := <-channel:
-                analyseData, err := c.Render(d, &execEvent{})
-                if err != nil {
-                    fmt.Println(err)
-                } else {
-                    ch <- analyseData
-                }
-                // only once
-                return
-            case ready <- struct{}{}:
-                // tell i am ready for monitor
-                // next time need block
-                ready = make(chan struct{})
-            }
-        }
-    }()
-
-    perMap.Start()
-    // wait until receive data
-    <-ok
-    perMap.Stop()
 }

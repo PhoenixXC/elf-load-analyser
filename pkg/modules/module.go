@@ -9,7 +9,9 @@ import (
     "github.com/phoenixxc/elf-load-analyser/pkg/data"
     "github.com/phoenixxc/elf-load-analyser/pkg/factory"
     "github.com/phoenixxc/elf-load-analyser/pkg/system"
+    "log"
     "reflect"
+    "strings"
 )
 
 var (
@@ -60,4 +62,129 @@ func (b *BaseMonitorModule) Render(data []byte, event EventResult) (*data.Analys
         return nil, e
     }
     return event.Render(), nil
+}
+
+// PerfResolveMonitorModule BaseMonitorModule 的高级抽象，封装 table 和 resolve 的处理
+type PerfResolveMonitorModule struct {
+    *BaseMonitorModule
+    tableIds      []string
+    table2loop    map[string]bool
+    table2chan    map[string]chan []byte
+    table2handler map[string]func(data []byte) (*data.AnalyseData, error)
+    stopHandler   func(p *PerfResolveMonitorModule)
+}
+
+func NewPerfResolveMonitorModule(m MonitorModule) *PerfResolveMonitorModule {
+    return &PerfResolveMonitorModule{
+        BaseMonitorModule: &BaseMonitorModule{
+            MonitorModule: m,
+        },
+        tableIds:          []string{},
+        table2loop:        map[string]bool{},
+        table2chan:        map[string]chan []byte{},
+        table2handler:     map[string]func(data []byte) (*data.AnalyseData, error){},
+        stopHandler:       nil,
+    }
+}
+
+func (p *PerfResolveMonitorModule) RegisterTable(name string, loop bool, handler func(data []byte) (*data.AnalyseData, error)) {
+    name = strings.TrimSpace(name)
+    if handler == nil || len(name) == 0 {
+        return
+    }
+    p.tableIds = append(p.tableIds, name)
+    p.table2chan[name] = make(chan []byte)
+    p.table2handler[name] = handler
+    p.table2loop[name] = loop
+}
+
+func (p *PerfResolveMonitorModule) RegisterStopHandle(handler func(p *PerfResolveMonitorModule)) {
+    p.stopHandler = handler
+}
+
+func (p *PerfResolveMonitorModule) Resolve(m *bpf.Module, ch chan<- *data.AnalyseData,
+    ready chan<- struct{}, stop <-chan struct{}) {
+    if len(p.tableIds) == 0 {
+        return
+    }
+
+    // init perf map
+    perI := 0
+    perfMaps := make([]*bpf.PerfMap, len(p.tableIds))
+    for _, table := range p.tableIds {
+        t := bpf.NewTable(m.TableId(table), m)
+        perf, err := bpf.InitPerfMap(t, p.table2chan[table], nil)
+        if err != nil {
+            log.Fatalf(system.Error("(%s, %s) Failed to init perf map: %v\n"), p.Monitor(), "events", err)
+        }
+        perfMaps[perI] = perf
+        perI++
+    }
+
+    ok := make(chan struct{})
+
+    go func() {
+        defer func() { close(ok) }()
+
+        chCnt := len(p.table2chan)
+        cnt := chCnt + 1
+        if p.stopHandler != nil {
+            cnt++
+        }
+        remaining := cnt
+        tableNames := make([]string, chCnt)
+        cases := make([]reflect.SelectCase, cnt)
+
+        i := 0
+        for t, c := range p.table2chan {
+            cases[i] = reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(c)}
+            tableNames[i] = t
+            i++
+        }
+        cases[chCnt] = reflect.SelectCase{
+            Dir:  reflect.SelectSend,
+            Chan: reflect.ValueOf(ready),
+            Send: reflect.ValueOf(struct{}{}),
+        }
+        if idx := chCnt + 1; idx < cnt {
+            cases[idx] = reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(stop)}
+        }
+
+        for remaining > 0 {
+            chosen, value, ok := reflect.Select(cases)
+            if !ok {
+                cases[chosen].Chan = reflect.ValueOf(nil)
+                remaining -= 1
+                continue
+            }
+            if chosen == chCnt {
+                cases[chosen].Chan = reflect.ValueOf(nil)
+            } else if chosen == chCnt+1 {
+                p.stopHandler(p)
+            } else {
+                d := value.Bytes()
+                tName := tableNames[chosen]
+                analyseData, err := p.table2handler[tName](d)
+                if err != nil {
+                    fmt.Println(err)
+                } else {
+                    ch <- analyseData
+                }
+
+                if p.table2loop[tName] {
+                    continue
+                }
+                cases[chosen].Chan = reflect.ValueOf(nil)
+            }
+            remaining -= 1
+        }
+    }()
+
+    for _, perfMap := range perfMaps {
+        perfMap.Start()
+    }
+    <-ok
+    for _, perfMap := range perfMaps {
+        perfMap.Stop()
+    }
 }
