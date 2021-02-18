@@ -3,6 +3,7 @@ package factory
 import (
     "github.com/phoenixxc/elf-load-analyser/pkg/bcc"
     "github.com/phoenixxc/elf-load-analyser/pkg/data"
+    "github.com/phoenixxc/elf-load-analyser/pkg/system"
     "log"
     "time"
 )
@@ -32,7 +33,11 @@ func LoadMonitors(ctx bcc.Context, ok chan struct{}) *data.Pool {
     cnt := 0
     for _, monitor := range factory {
         monitor := monitor
-        _ = monitor.TouchOff(ctx.Pid)
+        err := monitor.PreProcessing(ctx)
+        if err != nil {
+            log.Printf(system.Error("Monitor %q pre processing error: %v\n"), monitor.Name, err)
+            continue
+        }
         m, g := monitor.DoAction()
         if g {
             cnt++

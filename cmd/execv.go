@@ -29,7 +29,7 @@ func childProcess(execPath string) {
     argsEnv, _ := os.LookupEnv(ChildArgsFlag)
     execArgs := []string{execPath}
     execArgs = append(execArgs, strings.Fields(argsEnv)...)
-    log.Printf("Start binary %q with \"%v\" to analyse load data...\n", execPath, execArgs)
+    log.Printf("Boot binary %q with \"%v\" to analyse load data...\n", execPath, execArgs)
     if err := syscall.Exec(execPath, execArgs, os.Environ()); err != nil {
         log.Fatalf("Call binary failed, %v", err)
     }

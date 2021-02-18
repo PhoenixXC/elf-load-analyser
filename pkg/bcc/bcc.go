@@ -12,7 +12,6 @@ import (
 const (
     KprobesEvent    = 1 << iota // kprobes
     KretprobesEvent             // kretprobes
-    SyscallEvent                // syscall
 )
 
 type Context struct {
@@ -26,14 +25,8 @@ type action interface {
     Load(m *bpf.Module) (int, error)
 }
 
-type RegisterHandler interface {
-    // handle op, return is continue register and error
-    Handle() (bool, error)
-}
-
 type Event struct {
     action
-    RegisterHandler
     Class  int    // 事件类型
     Name   string // 事件名称
     FnName string // 函数名称
@@ -41,10 +34,6 @@ type Event struct {
 
 func NewEvent(class int, name string, fnName string) *Event {
     return &Event{Class: class, Name: name, FnName: fnName}
-}
-
-func (e *Event) WithHandle(handle RegisterHandler) {
-    e.RegisterHandler = handle
 }
 
 type Monitor struct {
@@ -76,26 +65,17 @@ func (m *Monitor) initialize() *bpf.Module {
     return bpf.NewModule(m.Source, m.CFlags)
 }
 
-// TouchOff pid 触发的默认实现
-func (m *Monitor) TouchOff(pid int) error {
-    m.Source = strings.Replace(m.Source, "_PID_", strconv.Itoa(pid), -1)
+// PreProcessing 预处理
+func (m *Monitor) PreProcessing(ctx Context) error {
+    // PID replace
+    m.Source = strings.Replace(m.Source, "_PID_", strconv.Itoa(ctx.Pid), -1)
+    // dev headers replace
+    m.Source = strings.ReplaceAll(m.Source, "#include \"_dev.h\"", "//")
     return nil
 }
 
 // AddEvent 设置事件
 func (m *Monitor) AddEvent(event *Event) *Monitor {
-    // do pre Handle
-    if event.RegisterHandler != nil {
-        goOn, err := event.RegisterHandler.Handle()
-        if err != nil {
-            log.Printf(system.Error("Failed to register [%v] event, %v\n"), *event, err)
-        }
-        if !goOn {
-            log.Printf(system.Warn("Ignore register [%v] event"), *event)
-            return m
-        }
-    }
-
     if m.event2Action == nil {
         m.event2Action = make(map[*Event]*action)
     }

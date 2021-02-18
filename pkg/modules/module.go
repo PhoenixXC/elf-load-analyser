@@ -64,14 +64,20 @@ func (b *BaseMonitorModule) Render(data []byte, event EventResult) (*data.Analys
     return event.Render(), nil
 }
 
+// tCtx table context
+type tCtx struct {
+    name string
+    loop bool
+    channel chan []byte
+    handler func(data []byte) (*data.AnalyseData, error)
+}
+
 // PerfResolveMonitorModule BaseMonitorModule 的高级抽象，封装 table 和 resolve 的处理
 type PerfResolveMonitorModule struct {
     *BaseMonitorModule
-    tableIds      []string
-    table2loop    map[string]bool
-    table2chan    map[string]chan []byte
-    table2handler map[string]func(data []byte) (*data.AnalyseData, error)
-    stopHandler   func(p *PerfResolveMonitorModule)
+    tableIds  []string
+    table2Ctx map[string]*tCtx
+    stopHandler func(p *PerfResolveMonitorModule)
 }
 
 func NewPerfResolveMonitorModule(m MonitorModule) *PerfResolveMonitorModule {
@@ -79,11 +85,9 @@ func NewPerfResolveMonitorModule(m MonitorModule) *PerfResolveMonitorModule {
         BaseMonitorModule: &BaseMonitorModule{
             MonitorModule: m,
         },
-        tableIds:          []string{},
-        table2loop:        map[string]bool{},
-        table2chan:        map[string]chan []byte{},
-        table2handler:     map[string]func(data []byte) (*data.AnalyseData, error){},
-        stopHandler:       nil,
+        tableIds:  []string{},
+        table2Ctx: map[string]*tCtx{},
+        stopHandler: nil,
     }
 }
 
@@ -93,9 +97,12 @@ func (p *PerfResolveMonitorModule) RegisterTable(name string, loop bool, handler
         return
     }
     p.tableIds = append(p.tableIds, name)
-    p.table2chan[name] = make(chan []byte)
-    p.table2handler[name] = handler
-    p.table2loop[name] = loop
+    p.table2Ctx[name] = &tCtx{
+        name:    fmt.Sprintf("%s@%s", p.Monitor(), name),
+        loop:    loop,
+        channel: make(chan []byte),
+        handler: handler,
+    }
 }
 
 func (p *PerfResolveMonitorModule) RegisterStopHandle(handler func(p *PerfResolveMonitorModule)) {
@@ -113,7 +120,7 @@ func (p *PerfResolveMonitorModule) Resolve(m *bpf.Module, ch chan<- *data.Analys
     perfMaps := make([]*bpf.PerfMap, len(p.tableIds))
     for _, table := range p.tableIds {
         t := bpf.NewTable(m.TableId(table), m)
-        perf, err := bpf.InitPerfMap(t, p.table2chan[table], nil)
+        perf, err := bpf.InitPerfMap(t, p.table2Ctx[table].channel, nil)
         if err != nil {
             log.Fatalf(system.Error("(%s, %s) Failed to init perf map: %v\n"), p.Monitor(), "events", err)
         }
@@ -126,7 +133,7 @@ func (p *PerfResolveMonitorModule) Resolve(m *bpf.Module, ch chan<- *data.Analys
     go func() {
         defer func() { close(ok) }()
 
-        chCnt := len(p.table2chan)
+        chCnt := len(p.table2Ctx)
         cnt := chCnt + 1
         if p.stopHandler != nil {
             cnt++
@@ -136,8 +143,8 @@ func (p *PerfResolveMonitorModule) Resolve(m *bpf.Module, ch chan<- *data.Analys
         cases := make([]reflect.SelectCase, cnt)
 
         i := 0
-        for t, c := range p.table2chan {
-            cases[i] = reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(c)}
+        for t, c := range p.table2Ctx {
+            cases[i] = reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(c.channel)}
             tableNames[i] = t
             i++
         }
@@ -157,21 +164,25 @@ func (p *PerfResolveMonitorModule) Resolve(m *bpf.Module, ch chan<- *data.Analys
                 remaining -= 1
                 continue
             }
+
+            tName := tableNames[chosen]
+            ctx := p.table2Ctx[tName]
+
             if chosen == chCnt {
                 cases[chosen].Chan = reflect.ValueOf(nil)
             } else if chosen == chCnt+1 {
                 p.stopHandler(p)
             } else {
                 d := value.Bytes()
-                tName := tableNames[chosen]
-                analyseData, err := p.table2handler[tName](d)
+                log.Printf("Resolve %q...", ctx.name)
+                analyseData, err := ctx.handler(d)
                 if err != nil {
-                    fmt.Println(err)
+                    log.Printf("Event %q resolve error: %v", ctx.name, err)
                 } else {
                     ch <- analyseData
                 }
 
-                if p.table2loop[tName] {
+                if ctx.loop {
                     continue
                 }
                 cases[chosen].Chan = reflect.ValueOf(nil)
