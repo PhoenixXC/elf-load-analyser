@@ -1,0 +1,21 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/usr/include/",
+                "/home/xuanc/文档/CodePratice/ELF/bcc/src/cc/",
+                "/usr/lib/modules/5.10.13-2-MANJARO/build/include/",
+                "/usr/lib/modules/5.10.13-2-MANJARO/build/arch/x86/include/",
+                "/usr/lib/modules/5.10.13-2-MANJARO/build/include/asm-generic/"
+            ],
+            "defines": ["_PID_", "_DEV_"],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c17",
+            "cppStandard": "c++14",
+            "intelliSenseMode": "linux-clang-x64"
+        }
+    ],
+    "version": 4
+}

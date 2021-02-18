@@ -2,6 +2,8 @@
 #include <linux/sched.h>
 #include <linux/binfmts.h>
 
+#include "_dev.h"
+
 struct alloc_bprm_event {
     char filename[256];
     char fdpath[256];

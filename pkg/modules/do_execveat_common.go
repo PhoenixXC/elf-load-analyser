@@ -7,20 +7,20 @@ import (
     "github.com/phoenixxc/elf-load-analyser/pkg/data"
 )
 
-//go:embed src/do_execveat_common.c
+//go:embed src/do_execveat_common.cpp
 var doExecveatCommonSource string
 
 const (
     monitorName = "hook_execveat"
 )
 
-type execEvent struct {
+type execveatComEvent struct {
     Fd       int32
     Flags    int32
     Filename [256]byte
 }
 
-func (e *execEvent) Render() *data.AnalyseData {
+func (e *execveatComEvent) Render() *data.AnalyseData {
     s := bytes2Str(e.Filename[:])
     msg := fmt.Sprintf("Do `%s` function, with fd = %d, flags = %d, filename = %s\n",
         "do_execveat_common", e.Fd, e.Flags, s)
@@ -34,7 +34,7 @@ type doExecveatCommon struct {
 func init() {
     m := NewPerfResolveMonitorModule(&doExecveatCommon{})
     m.RegisterTable("events", false, func(data []byte) (*data.AnalyseData, error) {
-        return m.Render(data, &execEvent{})
+        return m.Render(data, &execveatComEvent{})
     })
     ModuleInit(m, false)
 }

@@ -5,12 +5,11 @@ import (
     "fmt"
     "github.com/phoenixxc/elf-load-analyser/pkg/bcc"
     "github.com/phoenixxc/elf-load-analyser/pkg/data"
-    "log"
 )
 
 // about stack 512byte limit,
 // see: https://stackoverflow.com/questions/53627094/ebpf-track-values-longer-than-stack-size
-//go:embed src/alloc_bprm.c
+//go:embed src/alloc_bprm.cpp
 var allowBprmSource string
 
 type allocBprmEvent struct {
@@ -37,7 +36,6 @@ type allocBprm struct {
 func init() {
     m := NewPerfResolveMonitorModule(&allocBprm{})
     m.RegisterTable("events", false, func(data []byte) (*data.AnalyseData, error) {
-        log.Println(m.Monitor(), "Call alloc bprm finished")
         return m.Render(data, &allocBprmEvent{})
     })
     ModuleInit(m, true)
