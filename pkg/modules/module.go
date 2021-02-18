@@ -66,8 +66,8 @@ func (b *BaseMonitorModule) Render(data []byte, event EventResult) (*data.Analys
 
 // tCtx table context
 type tCtx struct {
-    name string
-    loop bool
+    name    string
+    loop    bool
     channel chan []byte
     handler func(data []byte) (*data.AnalyseData, error)
 }
@@ -75,8 +75,8 @@ type tCtx struct {
 // PerfResolveMonitorModule BaseMonitorModule 的高级抽象，封装 table 和 resolve 的处理
 type PerfResolveMonitorModule struct {
     *BaseMonitorModule
-    tableIds  []string
-    table2Ctx map[string]*tCtx
+    tableIds    []string
+    table2Ctx   map[string]*tCtx
     stopHandler func(p *PerfResolveMonitorModule)
 }
 
@@ -85,8 +85,8 @@ func NewPerfResolveMonitorModule(m MonitorModule) *PerfResolveMonitorModule {
         BaseMonitorModule: &BaseMonitorModule{
             MonitorModule: m,
         },
-        tableIds:  []string{},
-        table2Ctx: map[string]*tCtx{},
+        tableIds:    []string{},
+        table2Ctx:   map[string]*tCtx{},
         stopHandler: nil,
     }
 }
@@ -168,11 +168,10 @@ func (p *PerfResolveMonitorModule) Resolve(m *bpf.Module, ch chan<- *data.Analys
             tName := tableNames[chosen]
             ctx := p.table2Ctx[tName]
 
-            if chosen == chCnt {
-                cases[chosen].Chan = reflect.ValueOf(nil)
-            } else if chosen == chCnt+1 {
+            if chosen == chCnt+1 {
                 p.stopHandler(p)
-            } else {
+                return
+            } else if chosen != chCnt {
                 d := value.Bytes()
                 log.Printf("Resolve %q...", ctx.name)
                 analyseData, err := ctx.handler(d)
@@ -185,8 +184,8 @@ func (p *PerfResolveMonitorModule) Resolve(m *bpf.Module, ch chan<- *data.Analys
                 if ctx.loop {
                     continue
                 }
-                cases[chosen].Chan = reflect.ValueOf(nil)
             }
+            cases[chosen].Chan = reflect.ValueOf(nil)
             remaining -= 1
         }
     }()
