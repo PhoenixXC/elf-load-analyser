@@ -37,8 +37,21 @@ type MonitorModule interface {
     Render(data []byte, event EventResult) (*data.AnalyseData, error)
 }
 
+// ModuleDefaultInit 注册 Module
+func ModuleDefaultInit(mm MonitorModule)  {
+    ModuleInit(mm, false)
+}
+
 // ModuleInit 注册 Module
 func ModuleInit(mm MonitorModule, end bool) {
+    // PerfResolveMonitorModule stop handler check
+    if end {
+        switch mm := mm.(type) {
+        case *PerfResolveMonitorModule:
+            mm.stopHandler = nil
+        }
+    }
+
     m := bcc.NewMonitor(mm.Monitor(), mm.Source(), defaultFlags, mm.Resolve)
     for _, event := range mm.Events() {
         m.AddEvent(event)
@@ -89,6 +102,10 @@ func NewPerfResolveMonitorModule(m MonitorModule) *PerfResolveMonitorModule {
         table2Ctx:   map[string]*tCtx{},
         stopHandler: nil,
     }
+}
+
+func (p *PerfResolveMonitorModule) RegisterOnceTable(name string, handler func(data []byte) (*data.AnalyseData, error)) {
+    p.RegisterTable(name, false, handler)
 }
 
 func (p *PerfResolveMonitorModule) RegisterTable(name string, loop bool, handler func(data []byte) (*data.AnalyseData, error)) {

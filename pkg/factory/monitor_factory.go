@@ -31,6 +31,7 @@ func LoadMonitors(ctx bcc.Context, ok chan struct{}) *data.Pool {
 
     log.Println("Start load monitor....")
     cnt := 0
+    endFlag := false
     for _, monitor := range factory {
         monitor := monitor
         err := monitor.PreProcessing(ctx)
@@ -44,8 +45,9 @@ func LoadMonitors(ctx bcc.Context, ok chan struct{}) *data.Pool {
             go func() {
                 log.Printf("Monitor %s start to resolve...\n", monitor.Name)
                 monitor.Resolve(m, ch, ready, ok)
-                if monitor.IsEnd() {
+                if monitor.IsEnd() && !endFlag {
                     close(ok)
+                    endFlag = true
                 }
                 defer m.Close()
             }()

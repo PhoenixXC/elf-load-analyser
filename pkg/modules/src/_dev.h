@@ -1,7 +1,6 @@
-#ifndef _XC_DEV_
-#define _XC_DEV_
+#ifndef _XC_DEV_H
+#define _XC_DEV_H
 
-#include <export/footer.h>
 #include <export/helpers.h>
 #include <export/proto.h>
 

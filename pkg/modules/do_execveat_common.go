@@ -33,10 +33,10 @@ type doExecveatCommon struct {
 
 func init() {
     m := NewPerfResolveMonitorModule(&doExecveatCommon{})
-    m.RegisterTable("events", false, func(data []byte) (*data.AnalyseData, error) {
+    m.RegisterOnceTable("events", func(data []byte) (*data.AnalyseData, error) {
         return m.Render(data, &execveatComEvent{})
     })
-    ModuleInit(m, false)
+    ModuleDefaultInit(m)
 }
 
 func (c *doExecveatCommon) Monitor() string {

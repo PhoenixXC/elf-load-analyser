@@ -35,10 +35,10 @@ type allocBprm struct {
 
 func init() {
     m := NewPerfResolveMonitorModule(&allocBprm{})
-    m.RegisterTable("events", false, func(data []byte) (*data.AnalyseData, error) {
+    m.RegisterOnceTable("events", func(data []byte) (*data.AnalyseData, error) {
         return m.Render(data, &allocBprmEvent{})
     })
-    ModuleInit(m, true)
+    ModuleDefaultInit(m)
 }
 
 func (a *allocBprm) Monitor() string {
