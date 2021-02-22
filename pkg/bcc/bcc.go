@@ -37,7 +37,6 @@ func NewEvent(class int, name string, fnName string) *Event {
 }
 
 type Monitor struct {
-    isInit       bool
     isEnd        bool // end monitor level
     event2Action map[*Event]*action
     Name         string
@@ -61,14 +60,13 @@ func NewMonitor(name string, source string, cFlags []string,
 
 // initialize 创建 bpf 模块
 func (m *Monitor) initialize() *bpf.Module {
-    m.isInit = true
     return bpf.NewModule(m.Source, m.CFlags)
 }
 
 // PreProcessing 预处理
 func (m *Monitor) PreProcessing(ctx Context) error {
     // PID replace
-    m.Source = strings.Replace(m.Source, "_PID_", strconv.Itoa(ctx.Pid), -1)
+    m.Source = strings.ReplaceAll(m.Source, "_PID_", strconv.Itoa(ctx.Pid))
     // dev headers replace
     m.Source = strings.ReplaceAll(m.Source, "#include \"_dev.h\"", "//")
     return nil
@@ -90,11 +88,17 @@ func (m *Monitor) DoAction() (*bpf.Module, bool) {
     for event, action := range m.event2Action {
         fd, err := (*action).Load(module)
         if err != nil {
-            log.Printf(system.Error("Failed to load event %v, %v\n"), *event, err)
-            continue
+            log.Printf(system.Warn("Failed to load event %v, %v"), *event, err)
         }
-        if err = (*action).Attach(module, fd); err != nil {
-            log.Printf(system.Error("Failed to attach event %v, %v\n"), *event, err)
+        if err == nil {
+            if err = (*action).Attach(module, fd); err != nil {
+                log.Printf(system.Warn("Failed to attach event %v, %v"), *event, err)
+            }
+        }
+        if err != nil {
+            if m.IsEnd() {
+                log.Fatalf(system.Error("The necessary monitor %q start failed"), m.Name)
+            }
             continue
         }
         goOn = true
