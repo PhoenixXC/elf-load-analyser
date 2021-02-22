@@ -11,7 +11,7 @@ import (
 
 // about stack 512byte limit,
 // see: https://stackoverflow.com/questions/53627094/ebpf-track-values-longer-than-stack-size
-//go:embed src/alloc_bprm.cpp
+//go:embed src/alloc_bprm.cpp.k
 var allowBprmSource string
 
 type allocBprmEvent struct {

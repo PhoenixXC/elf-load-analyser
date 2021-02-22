@@ -3,6 +3,7 @@
 #include <linux/sched.h>
 
 #include "_dev.h"
+#include "common.h"
 
 struct alloc_bprm_event {
     uint64_t ts;

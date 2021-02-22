@@ -9,7 +9,7 @@ import (
     "github.com/phoenixxc/elf-load-analyser/pkg/modules/enhance"
 )
 
-//go:embed src/do_execveat_common.cpp
+//go:embed src/do_execveat_common.cpp.k
 var doExecveatCommonSource string
 
 const (

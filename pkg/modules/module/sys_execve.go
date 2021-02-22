@@ -31,7 +31,7 @@ func (s sysExecveRetEvent) Render() *data.AnalyseData {
     return data.NewAnalyseData(item, data.NewData(data.MarkdownType, "execve success"))
 }
 
-//go:embed src/execve.cpp
+//go:embed src/execve.cpp.k
 var execveSource string
 
 type sysExecve struct {

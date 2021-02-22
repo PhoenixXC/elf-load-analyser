@@ -67,8 +67,6 @@ func (m *Monitor) initialize() *bpf.Module {
 func (m *Monitor) PreProcessing(ctx Context) error {
     // PID replace
     m.Source = strings.ReplaceAll(m.Source, "_PID_", strconv.Itoa(ctx.Pid))
-    // dev headers replace
-    m.Source = strings.ReplaceAll(m.Source, "#include \"_dev.h\"", "//")
     return nil
 }
 
