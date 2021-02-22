@@ -2,16 +2,15 @@
 package system
 
 import (
-	"bufio"
-	"compress/gzip"
-	"io/ioutil"
-	"log"
-	"os"
-	"runtime"
-	"strings"
-	"sync"
-
-	"github.com/phoenixxc/elf-load-analyser/pkg/validate"
+    "bufio"
+    "compress/gzip"
+    "github.com/phoenixxc/elf-load-analyser/pkg/helper"
+    "io/ioutil"
+    "log"
+    "os"
+    "runtime"
+    "strings"
+    "sync"
 )
 
 const (
@@ -67,7 +66,7 @@ func GetKernelConfigs() map[string]bool {
 
 func extraKernelVersion() {
 	// check system type
-	validate.EqualWithTip("linux", GetSysOS(), "Unsupported system, the toolkit just for linux")
+	helper.EqualWithTip("linux", GetSysOS(), "Unsupported system, the toolkit just for linux")
 
 	file, err := os.Open(kernelReleaseFile)
 	if err != nil {

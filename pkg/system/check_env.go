@@ -1,11 +1,10 @@
 package system
 
 import (
+    "github.com/phoenixxc/elf-load-analyser/pkg/helper"
     "log"
     "os/exec"
     "runtime"
-
-    "github.com/phoenixxc/elf-load-analyser/pkg/validate"
 )
 
 // requiredConfigs kernel required configuration,
@@ -14,13 +13,7 @@ var requiredConfigs = []string{
     "CONFIG_BPF",
     "CONFIG_BPF_SYSCALL",
     "CONFIG_BPF_JIT",
-    // 不支持三目运算符也太...
-    func() string {
-        if GetKernelVersion() >= "4.7" {
-            return "CONFIG_HAVE_EBPF_JIT"
-        }
-        return "CONFIG_HAVE_BPF_JIT"
-    }(),
+    helper.IfElse(GetKernelVersion() >= "4.7", "CONFIG_HAVE_EBPF_JIT", "CONFIG_HAVE_BPF_JIT").(string),
     "CONFIG_BPF_EVENTS",
 }
 
@@ -29,10 +22,10 @@ func CheckEnv() {
     log.Printf("OS: %s\tARCH: %s\n", os, arch)
 
     // Check os
-    validate.EqualWithTip("linux", os, "Unsupported platform, just work on linux")
+    helper.EqualWithTip("linux", os, "Unsupported platform, just work on linux")
 
     // Check kernel version
-    validate.WithTip("4.1", GetKernelVersion(),
+    helper.WithTip("4.1", GetKernelVersion(),
         func(expected, actual interface{}) bool {
             return actual.(string) >= expected.(string)
         },
@@ -41,7 +34,7 @@ func CheckEnv() {
     )
 
     // Check kernel config
-    validate.WithTip(requiredConfigs, GetKernelConfigs(),
+    helper.WithTip(requiredConfigs, GetKernelConfigs(),
         func(expected, actual interface{}) bool {
             kernelConfigs := actual.(map[string]bool)
             for _, entry := range expected.([]string) {
@@ -68,7 +61,7 @@ for more information, see "https://github.com/iovisor/bcc/blob/master/INSTALL.md
 
     // Check if bcc is installed
     log.Printf(Emphasize("The program depend on bcc, please make sure you had install bcc, "+
-        "for more information, see %q\n"), "https://github.com/iovisor/bcc/blob/master/INSTALL.md")
+        "for more information, see %q"), "https://github.com/iovisor/bcc/blob/master/INSTALL.md")
     binary, lookErr := exec.LookPath("bcc")
     if lookErr != nil {
         log.Fatalf("Bcc cannot find, %v", lookErr)
