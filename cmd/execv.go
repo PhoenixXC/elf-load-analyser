@@ -66,7 +66,7 @@ func buildProcess(ctx execCtx) int {
         log.Fatalf("Create process failed, %v\n", err)
     }
 
-    log.Printf("Create child process %d, parent: %d success\n", childPID, os.Getppid())
+    log.Printf("Create child process %d(parent: %d) success\n", childPID, os.Getppid())
     return childPID
 }
 

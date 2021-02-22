@@ -4,8 +4,9 @@ import (
     "flag"
     "fmt"
     "github.com/phoenixxc/elf-load-analyser/pkg/bcc"
+    "github.com/phoenixxc/elf-load-analyser/pkg/data"
     "github.com/phoenixxc/elf-load-analyser/pkg/factory"
-    _ "github.com/phoenixxc/elf-load-analyser/pkg/modules" // use side effect load modules
+    _ "github.com/phoenixxc/elf-load-analyser/pkg/modules/module"
     "github.com/phoenixxc/elf-load-analyser/pkg/system"
     "os/user"
     "strconv"
@@ -58,10 +59,17 @@ func main() {
 
     // wait until data collection ok
     <-ok
-    data := pool.Data()
-    for _, analyseData := range data {
+    d := pool.Data()
+    for _, analyseData := range d {
         // Just for debug
-        fmt.Println(analyseData)
+        fmt.Println(analyseData.Timestamp(), analyseData.Name(),
+            func() interface{} {
+                if analyseData.Status() == data.Success {
+                    return analyseData.Data().Data
+                }
+                return analyseData.Desc()
+            }(),
+        )
     }
 
     // cache load detail data, render use html(use graphviz build images, if no graphviz, show code use <code> tag)

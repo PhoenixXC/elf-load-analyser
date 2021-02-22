@@ -43,7 +43,7 @@ func LoadMonitors(ctx bcc.Context, ok chan struct{}) *data.Pool {
         if g {
             cnt++
             go func() {
-                log.Printf("Monitor %s start to resolve...\n", monitor.Name)
+                log.Printf("Monitor %s start...\n", monitor.Name)
                 monitor.Resolve(m, ch, ready, ok)
                 if monitor.IsEnd() && !endFlag {
                     close(ok)
@@ -57,7 +57,7 @@ func LoadMonitors(ctx bcc.Context, ok chan struct{}) *data.Pool {
     for ; cnt > 0; cnt-- {
         <-ready
     }
-    log.Println("Start load monitor ok")
+    log.Println("Load monitors ok")
 
     return p
 }
