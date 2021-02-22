@@ -1,10 +1,12 @@
-package modules
+package module
 
 import (
     _ "embed"
     "fmt"
     "github.com/phoenixxc/elf-load-analyser/pkg/bcc"
     "github.com/phoenixxc/elf-load-analyser/pkg/data"
+    "github.com/phoenixxc/elf-load-analyser/pkg/modules"
+    "github.com/phoenixxc/elf-load-analyser/pkg/modules/enhance"
 )
 
 // about stack 512byte limit,
@@ -13,6 +15,7 @@ import (
 var allowBprmSource string
 
 type allocBprmEvent struct {
+    enhance.TimeEventResult
     Filename    [256]byte
     Fdpath      [256]byte
     Interp      [256]byte
@@ -21,24 +24,24 @@ type allocBprmEvent struct {
     RlimMax     uint64
 }
 
-func (a *allocBprmEvent) Render() *data.AnalyseData {
+func (a allocBprmEvent) Render() *data.AnalyseData {
     s := fmt.Sprintf("after `%v`, filename: %q, fdpath: %q, interp: %q, rlimit stack cur: 0x%X,"+
         " rlimit stack max: 0x%X, current of top mem: 0x%X\n",
-        "alloc_bprm", bytes2Str(a.Filename[:]), bytes2Str(a.Fdpath[:]), bytes2Str(a.Interp[:]),
+        "alloc_bprm", data.TrimBytes2Str(a.Filename[:]), data.TrimBytes2Str(a.Fdpath[:]), data.TrimBytes2Str(a.Interp[:]),
         a.RlimCur, a.RlimMax, a.CurTopOfMem)
     return data.NewAnalyseData("alloc_bprm", data.NewData(data.MarkdownType, s))
 }
 
 type allocBprm struct {
-    *BaseMonitorModule
+    modules.MonitorModule
 }
 
 func init() {
-    m := NewPerfResolveMonitorModule(&allocBprm{})
+    m := modules.NewPerfResolveMonitorModule(&allocBprm{})
     m.RegisterOnceTable("events", func(data []byte) (*data.AnalyseData, error) {
-        return m.Render(data, &allocBprmEvent{})
+        return modules.Render(data, &allocBprmEvent{}, true)
     })
-    ModuleDefaultInit(m)
+    modules.ModuleDefaultInit(m)
 }
 
 func (a *allocBprm) Monitor() string {
