@@ -2,7 +2,8 @@ package main
 
 import (
     "fmt"
-    "log"
+    "github.com/phoenixxc/elf-load-analyser/pkg/log"
+
     "os"
     "os/signal"
     "strings"
@@ -16,8 +17,8 @@ const (
 
 type execCtx struct {
     execArgs string
-    uid int
-    gid int
+    uid      int
+    gid      int
 }
 
 func childProcess(execPath string) {
@@ -29,9 +30,9 @@ func childProcess(execPath string) {
     argsEnv, _ := os.LookupEnv(ChildArgsFlag)
     execArgs := []string{execPath}
     execArgs = append(execArgs, strings.Fields(argsEnv)...)
-    log.Printf("Boot binary %q with \"%v\" to analyse load data...\n", execPath, execArgs)
+    log.Infof("Boot binary %q with \"%v\" to analyse load data...", execPath, execArgs)
     if err := syscall.Exec(execPath, execArgs, os.Environ()); err != nil {
-        log.Fatalf("Call binary failed, %v", err)
+        log.Errorf("Call binary failed, %v", err)
     }
 
     // exit, do not touch parent process exec stream
@@ -45,7 +46,7 @@ func buildProcess(ctx execCtx) int {
     args := os.Args
     pwd, err := os.Getwd()
     if err != nil {
-        log.Fatalf("Get pwd error, %v", err)
+        log.Errorf("Get pwd error, %v", err)
     }
     childEnvItem := fmt.Sprintf("%s=%s", ChildFlagEnv, execPath)
     childArgItem := fmt.Sprintf("%s=%s", ChildArgsFlag, strings.TrimSpace(execArgs))
@@ -63,16 +64,16 @@ func buildProcess(ctx execCtx) int {
         Files: []uintptr{0, 1, 2},
     })
     if err != nil {
-        log.Fatalf("Create process failed, %v\n", err)
+        log.Errorf("Create process failed, %v", err)
     }
 
-    log.Printf("Create child process %d(parent: %d) success\n", childPID, os.Getppid())
+    log.Infof("Create child process %d(parent: %d) success", childPID, os.Getppid())
     return childPID
 }
 
 func wakeChild(childPID int) {
     err := syscall.Kill(childPID, syscall.SIGUSR1)
     if err != nil {
-        log.Fatalf("Wake child process error, %v\n", err)
+        log.Errorf("Wake child process error, %v", err)
     }
 }

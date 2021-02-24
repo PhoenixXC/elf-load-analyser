@@ -8,8 +8,7 @@ import (
     "github.com/phoenixxc/elf-load-analyser/pkg/bcc"
     "github.com/phoenixxc/elf-load-analyser/pkg/data"
     "github.com/phoenixxc/elf-load-analyser/pkg/factory"
-    "github.com/phoenixxc/elf-load-analyser/pkg/system"
-    "log"
+    "github.com/phoenixxc/elf-load-analyser/pkg/log"
     "reflect"
     "strconv"
 )
@@ -66,7 +65,7 @@ func ModuleInit(mm MonitorModule, end bool) {
 func Render(d []byte, event EventResult, enhance bool) (*data.AnalyseData, error) {
     err := binary.Read(bytes.NewBuffer(d), bpf.GetHostByteOrder(), event)
     if err != nil {
-        e := fmt.Errorf(system.Error("Failed to decode received data to %q: %v\n"),
+        e := fmt.Errorf("Failed to decode received data to %q: %v\n",
             reflect.TypeOf(event).Name(), err)
         return nil, e
     }
@@ -141,7 +140,7 @@ func toString(value reflect.Value) string {
     case reflect.Array:
         key = string(value.Slice(0, value.Len()).Bytes())
     default:
-        log.Fatalf(system.Error("Unsupported type %q"), value.Type().Name())
+        log.Errorf("Unsupported type %q", value.Type().Name())
     }
 
     return key

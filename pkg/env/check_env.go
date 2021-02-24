@@ -1,8 +1,8 @@
-package system
+package env
 
 import (
     "github.com/phoenixxc/elf-load-analyser/pkg/helper"
-    "log"
+    "github.com/phoenixxc/elf-load-analyser/pkg/log"
     "os/exec"
     "runtime"
 )
@@ -19,7 +19,7 @@ var requiredConfigs = []string{
 
 func CheckEnv() {
     os, arch := GetSysOS(), runtime.GOARCH
-    log.Printf("OS: %s\tARCH: %s\n", os, arch)
+    log.Infof("OS: %s\tARCH: %s", os, arch)
 
     // Check os
     helper.EqualWithTip("linux", os, "Unsupported platform, just work on linux")
@@ -60,12 +60,11 @@ for more information, see "https://github.com/iovisor/bcc/blob/master/INSTALL.md
 `)
 
     // Check if bcc is installed
-    log.Printf(Emphasize("The program depend on bcc, please make sure you had install bcc, "+
+    log.Infof(log.Emphasize("The program depend on bcc, please make sure you had install bcc, "+
         "for more information, see %q"), "https://github.com/iovisor/bcc/blob/master/INSTALL.md")
     binary, lookErr := exec.LookPath("bcc")
     if lookErr != nil {
-        log.Fatalf("Bcc cannot find, %v", lookErr)
+        log.Errorf("Bcc cannot find, %v", lookErr)
     }
-    log.Printf("Found bcc: %q\n", binary)
-
+    log.Infof("Found bcc: %q", binary)
 }

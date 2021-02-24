@@ -3,8 +3,7 @@ package bcc
 import (
     bpf "github.com/iovisor/gobpf/bcc"
     "github.com/phoenixxc/elf-load-analyser/pkg/data"
-    "github.com/phoenixxc/elf-load-analyser/pkg/system"
-    "log"
+    "github.com/phoenixxc/elf-load-analyser/pkg/log"
     "strconv"
     "strings"
 )
@@ -86,16 +85,16 @@ func (m *Monitor) DoAction() (*bpf.Module, bool) {
     for event, action := range m.event2Action {
         fd, err := (*action).Load(module)
         if err != nil {
-            log.Printf(system.Warn("Failed to load event %v, %v"), *event, err)
+            log.Warnf("Failed to load event %v, %v", *event, err)
         }
         if err == nil {
             if err = (*action).Attach(module, fd); err != nil {
-                log.Printf(system.Warn("Failed to attach event %v, %v"), *event, err)
+                log.Warnf("Failed to attach event %v, %v", *event, err)
             }
         }
         if err != nil {
             if m.IsEnd() {
-                log.Fatalf(system.Error("The necessary monitor %q start failed"), m.Name)
+                log.Errorf("The necessary monitor %q start failed", m.Name)
             }
             continue
         }

@@ -5,15 +5,15 @@ import (
     "fmt"
     "github.com/phoenixxc/elf-load-analyser/pkg/bcc"
     "github.com/phoenixxc/elf-load-analyser/pkg/data"
+    "github.com/phoenixxc/elf-load-analyser/pkg/env"
     "github.com/phoenixxc/elf-load-analyser/pkg/factory"
+    "github.com/phoenixxc/elf-load-analyser/pkg/log"
     _ "github.com/phoenixxc/elf-load-analyser/pkg/modules/module"
-    "github.com/phoenixxc/elf-load-analyser/pkg/system"
     "os/user"
     "strconv"
     "strings"
 
     "golang.org/x/sys/unix"
-    "log"
     "os"
     "path/filepath"
 )
@@ -22,17 +22,21 @@ var (
     execPath   string // exec file path
     execArgStr string // exec args
     execUser   string // exec user
+    logLevel   string
 )
 
 func init() {
     flag.StringVar(&execPath, "e", "", "the analyse program path")
     flag.StringVar(&execArgStr, "p", "", "the analyse program parameter, split by space")
     flag.StringVar(&execUser, "u", "", "the analyse program run user")
+    flag.StringVar(&logLevel, "l", "", "log level:info debug warn error")
 
     flag.Parse()
 }
 
 func main() {
+    log.SetConfigLevel(logLevel)
+
     // child
     transExecPath, isChild := os.LookupEnv(ChildFlagEnv)
     if isChild {
@@ -41,7 +45,7 @@ func main() {
 
     checkFlag()
     u, g := getUidGid(execUser)
-    system.CheckEnv()
+    env.CheckEnv()
 
     // fork, get pid, block until receive signal
     childPID := buildProcess(execCtx{
@@ -53,7 +57,6 @@ func main() {
     // bcc handler update, hook pid, load modules, begin hook
     ok := make(chan struct{})
     pool := factory.LoadMonitors(bcc.Context{Pid: childPID}, ok)
-
     // wake up chile to exec binary
     wakeChild(childPID)
 
@@ -90,12 +93,12 @@ func checkFlag() {
     }
     absPath, err := filepath.Abs(execPath)
     if err != nil {
-        log.Fatalf("Get absolute path error, %v", err)
+        log.Errorf("Get absolute path error, %v", err)
     }
     execPath = absPath
 
     if err := unix.Access(execPath, unix.X_OK); err != nil {
-        log.Fatalf("Check %q error, %v", execPath, err)
+        log.Errorf("Check %q error, %v", execPath, err)
     }
 }
 

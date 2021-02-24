@@ -2,7 +2,7 @@ package data
 
 import (
     "fmt"
-    "github.com/phoenixxc/elf-load-analyser/pkg/system"
+    "github.com/phoenixxc/elf-load-analyser/pkg/env"
     "os"
     "runtime"
     "strings"
@@ -10,7 +10,7 @@ import (
 )
 
 func TestItem(t *testing.T) {
-    sysItem := NewItem(H3Level, "系统", system.GetSysOS())
+    sysItem := NewItem(H3Level, "系统", env.GetSysOS())
     archItem := NewItem(H3Level, "平台", runtime.GOARCH)
     environItem := NewItem(H3Level, "环境变量", strings.Join(os.Environ(), ";"))
     envItem := NewItem(H2Level, "环境", sysItem.String(), archItem.String(), environItem.String())

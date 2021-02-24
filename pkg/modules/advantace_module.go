@@ -4,8 +4,7 @@ import (
     "fmt"
     bpf "github.com/iovisor/gobpf/bcc"
     "github.com/phoenixxc/elf-load-analyser/pkg/data"
-    "github.com/phoenixxc/elf-load-analyser/pkg/system"
-    "log"
+    "github.com/phoenixxc/elf-load-analyser/pkg/log"
     "reflect"
     "strings"
 )
@@ -147,20 +146,20 @@ func (p *PerfResolveMonitorModule) Resolve(m *bpf.Module, ch chan<- *data.Analys
 
 func dataProcessing(d []byte, ctx *TableCtx, ch chan<- *data.AnalyseData) {
     for name, handler := range registeredEnhancer {
-        log.Printf("%q pre handle", name)
+        log.Debugf("%q pre handle", name)
         handler.PreHandle(ctx)
     }
 
-    log.Printf("Resolve %q...", ctx.name)
+    log.Infof("Resolve %q...", ctx.name)
     analyseData, err := ctx.handler(d)
 
     for name, handler := range registeredEnhancer {
-        log.Printf("%q after handle", name)
+        log.Debugf("%q after handle", name)
         analyseData, err = handler.AfterHandle(ctx, analyseData, err)
     }
 
     if err != nil {
-        log.Printf(system.Error("Event %q resolve error: %v"), ctx.name, err)
+        log.Warnf("Event %q resolve error: %v", ctx.name, err)
     } else {
         ch <- analyseData
     }
@@ -196,7 +195,7 @@ func initPerMaps(m *bpf.Module, p *PerfResolveMonitorModule) []*bpf.PerfMap {
         t := bpf.NewTable(m.TableId(table), m)
         perf, err := bpf.InitPerfMap(t, p.table2Ctx[table].channel, nil)
         if err != nil {
-            log.Fatalf(system.Error("(%s, %s) Failed to init perf map: %v\n"), p.Monitor(), "events", err)
+            log.Errorf("(%s, %s) Failed to init perf map: %v\n", p.Monitor(), "events", err)
         }
         perfMaps[perI] = perf
         perI++

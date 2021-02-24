@@ -1,12 +1,12 @@
-// system env about, eg kernel version, system type
-package system
+// env env about, eg kernel version, env type
+package env
 
 import (
     "bufio"
     "compress/gzip"
     "github.com/phoenixxc/elf-load-analyser/pkg/helper"
+    "github.com/phoenixxc/elf-load-analyser/pkg/log"
     "io/ioutil"
-    "log"
     "os"
     "runtime"
     "strings"
@@ -37,13 +37,13 @@ func GetKernelVersion() string {
 func GetKernelConfigs() map[string]bool {
 	file, err := os.Open(kernelConfigGzFile)
 	if err != nil {
-		log.Fatalf("Open config file %q failed, %v", kernelConfigGzFile, err)
+		log.Errorf("Open config file %q failed, %v", kernelConfigGzFile, err)
 	}
 	defer file.Close()
 
 	reader, err := gzip.NewReader(file)
 	if err != nil {
-		log.Fatalf("Reset file %q err, %v", kernelConfigGzFile, err)
+		log.Errorf("Reset file %q err, %v", kernelConfigGzFile, err)
 	}
 	//goland:noinspection GoUnhandledErrorResult
 	defer reader.Close()
@@ -65,17 +65,17 @@ func GetKernelConfigs() map[string]bool {
 }
 
 func extraKernelVersion() {
-	// check system type
-	helper.EqualWithTip("linux", GetSysOS(), "Unsupported system, the toolkit just for linux")
+	// check env type
+	helper.EqualWithTip("linux", GetSysOS(), "Unsupported env, the toolkit just for linux")
 
 	file, err := os.Open(kernelReleaseFile)
 	if err != nil {
-		log.Fatalf("Open release file %q failed, %v", kernelReleaseFile, err)
+		log.Errorf("Open release file %q failed, %v", kernelReleaseFile, err)
 	}
 	defer file.Close()
 	release, err := ioutil.ReadAll(file)
 	if err != nil {
-		log.Fatalf("Read %q failed, %v", kernelReleaseFile, err)
+		log.Errorf("Read %q failed, %v", kernelReleaseFile, err)
 	}
 	kernelVersion = strings.TrimSpace(string(release))
 }

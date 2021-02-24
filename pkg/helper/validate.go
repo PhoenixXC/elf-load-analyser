@@ -2,13 +2,13 @@ package helper
 
 import (
     "fmt"
-    "log"
+    "github.com/phoenixxc/elf-load-analyser/pkg/log"
     "reflect"
 )
 
 func EqualWithTip(expected, actual interface{}, errorMsg string) {
     Equal(expected, actual, func(e, a interface{}) {
-        log.Fatal(errorMsg)
+        log.Info(errorMsg)
     })
 }
 
@@ -20,7 +20,7 @@ func Equal(expected, actual interface{}, handler func(e, a interface{})) {
 
 func WithTip(expected, actual interface{}, predicate func(expected, actual interface{}) bool, errorMsg string) {
     Validate(expected, actual, predicate, func(e, a interface{}) {
-        log.Fatal(errorMsg)
+        log.Error(errorMsg)
     })
 }
 

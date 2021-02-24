@@ -1,10 +1,9 @@
 package enhance
 
 import (
-    "fmt"
     "github.com/phoenixxc/elf-load-analyser/pkg/data"
+    "github.com/phoenixxc/elf-load-analyser/pkg/log"
     "github.com/phoenixxc/elf-load-analyser/pkg/modules"
-    "github.com/phoenixxc/elf-load-analyser/pkg/system"
     "strconv"
 )
 
@@ -21,7 +20,7 @@ type TimeEvent interface {
     Ns() uint64
 }
 
-// TimeEventResult EventResult with system boot ns, coordinate with enhance.timeEnhance
+// TimeEventResult EventResult with env boot ns, coordinate with enhance.timeEnhance
 type TimeEventResult struct {
     TS uint64 `enhance:"_ns_"`
 }
@@ -48,7 +47,7 @@ func (t timeEnhance) AfterHandle(tCtx *modules.TableCtx,
     if v, ok := aData.Extra(kernelBootNsKey); ok {
         ns, e := strconv.ParseUint(v, 10, 64)
         if e != nil {
-            fmt.Printf(system.Warn("%s can not convert %q data, %v"), "timeEnhance", kernelBootNsKey, e)
+            log.Warnf("%s can not convert %q data, %v", "timeEnhance", kernelBootNsKey, e)
             return aData, err
         }
         if tCtx.IsMark(StartMark) {
