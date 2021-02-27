@@ -81,20 +81,24 @@ func (m *Monitor) AddEvent(event *Event) *Monitor {
 // DoAction 执行 attach operation 操作
 func (m *Monitor) DoAction() (*bpf.Module, bool) {
     module := m.initialize()
-    goOn := false
     for event, action := range m.event2Action {
-        fd, err := (*action).Load(module)
+        action := *action
+        fd, err := action.Load(module)
         if err != nil {
             log.Warnf("Failed to load event %v, %v", *event, err)
-        } else if err = (*action).Attach(module, fd); err != nil {
+        } else if err = action.Attach(module, fd); err != nil {
             log.Warnf("Failed to attach event %v, %v", *event, err)
         }
-
         if err == nil {
-            goOn = true
-        } else if m.IsEnd() {
+            continue
+        }
+
+        if m.IsEnd() {
             log.Errorf("The necessary monitor %q start failed", m.Name)
+        } else {
+            log.Warnf("Module %q load failed, ignored", m.Name)
+            return module, false
         }
     }
-    return module, goOn
+    return module, true
 }

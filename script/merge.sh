@@ -3,7 +3,7 @@
 readonly OUT_SUFFIX="k"
 
 function merge_src() {
-  rm -- *."${OUT_SUFFIX}"
+  ls -- *."${OUT_SUFFIX}" >/dev/null 2>&1 && rm -- *."${OUT_SUFFIX}"
   for line in *.cpp
   do
     grep -E '^#include[[:blank:]]+"[[:print:]]+"$' "${line}" | awk '{print $2}' | tr -d '"' | awk '{

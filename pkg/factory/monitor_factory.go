@@ -43,8 +43,7 @@ func LoadMonitors(ctx bcc.Context, ok chan struct{}) *data.Pool {
             logHandle("Monitor %q pre processing error: %v", monitor.Name, err)
             continue
         }
-        m, g := monitor.DoAction()
-        if g {
+        if m, g := monitor.DoAction(); g {
             cnt++
             go func() {
                 log.Infof("Monitor %s start...", monitor.Name)
