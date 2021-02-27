@@ -4,15 +4,13 @@
 #include <uapi/linux/ptrace.h>
 
 #include "_dev.h"
+#include "common.h"
 
-struct call_sys_execve {
-    uint64_t ts;
-};
+TDATA(ret_sys_execve, 
+    int8_t ret; 
+);
 
-struct ret_sys_execve {
-    uint64_t ts;
-    int8_t ret;
-};
+TDATA(call_sys_execve, );
 
 BPF_PERF_OUTPUT(call_events);
 BPF_PERF_OUTPUT(ret_events);
@@ -24,8 +22,8 @@ int syscall__execve(struct pt_regs *ctx, const char __user *filename,
         return 0;
     }
     struct call_sys_execve e = {};
-    uint64_t ns = bpf_ktime_get_ns();
-    bpf_probe_read_kernel(&e.ts, sizeof(e.ts), (void *)(&ns));
+    init_tdata(&e);
+    bpf_trace_printk("call_syscall_execve => ns: %llu\n", e.ts); 
     call_events.perf_submit(ctx, &e, sizeof(struct call_sys_execve));
     return 0;
 }
@@ -35,9 +33,9 @@ int do_ret_sys_execve(struct pt_regs *ctx) {
     }
     int retval = PT_REGS_RC(ctx);
     struct ret_sys_execve e = {};
+    init_tdata(&e);
     bpf_probe_read_kernel(&e.ret, sizeof(e.ret), (void *)&retval);
-    uint64_t ns = bpf_ktime_get_ns();
-    bpf_probe_read_kernel(&e.ts, sizeof(e.ts), (void *)(&ns));
-    ret_events.perf_submit(ctx, &e, sizeof(e));
+    ret_events.perf_submit(ctx, &e, sizeof(struct ret_sys_execve));
+
     return 0;
 }

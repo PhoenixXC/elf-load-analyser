@@ -5,15 +5,14 @@
 #include "_dev.h"
 #include "common.h"
 
-struct alloc_bprm_event {
-    uint64_t ts;
+TDATA(alloc_bprm_event, 
     char filename[256];
     char fdpath[256];
     char interp[256];
     uint64_t cur_top_of_mem;
     uint64_t rlim_cur;
     uint64_t rlim_max;
-};
+);
 BPF_PERF_OUTPUT(events);
 BPF_PERCPU_ARRAY(alloc_bprm_array, struct alloc_bprm_event, 1);
 
@@ -27,6 +26,7 @@ int kretprobe__alloc_bprm(struct pt_regs* ctx) {
     struct linux_binprm* bprm = (struct linux_binprm*)PT_REGS_RC(ctx);
     struct alloc_bprm_event* e = alloc_bprm_array.lookup(&zero);
     if (!e) return 0;
+    init_tdata(e);
     bpf_probe_read_kernel(&e->filename, sizeof(e->filename),
                           (void*)bprm->filename);
     bpf_probe_read_kernel(&e->fdpath, sizeof(e->fdpath), (void*)bprm->fdpath);
@@ -39,8 +39,6 @@ int kretprobe__alloc_bprm(struct pt_regs* ctx) {
     e->rlim_max = (uint64_t)rlim_val;
     bpf_probe_read_kernel(&tmp_val, sizeof(bprm->p), (void*)&bprm->p);
     e->cur_top_of_mem = tmp_val;
-    uint64_t ns = bpf_ktime_get_ns();
-    bpf_probe_read_kernel(&e->ts, sizeof(e->ts), (void*)&ns);
     events.perf_submit(ctx, e, sizeof(*e));
     return 0;
 }

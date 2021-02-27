@@ -2,13 +2,13 @@
 #include <linux/sched.h>
 
 #include "_dev.h"
+#include "common.h"
 
-struct exec_event {
-    uint64_t ts;
+TDATA(exec_event, 
     int fd;
     int flags;
     char filename[256];
-};
+); 
 BPF_PERF_OUTPUT(events);
 
 int kprobe__do_execveat_common(struct pt_regs* ctx, int fd,
@@ -22,12 +22,11 @@ int kprobe__do_execveat_common(struct pt_regs* ctx, int fd,
         return 0;
     }
     struct exec_event event = {};
+    init_tdata(&event);
     bpf_probe_read_kernel(&(event.fd), sizeof(int), (void*)&fd);
     bpf_probe_read_kernel(&(event.flags), sizeof(int), (void*)&flags);
     bpf_probe_read_kernel_str(&(event.filename), sizeof(event.filename),
                               (void*)filename->name);
-    uint64_t ns = bpf_ktime_get_ns();
-    bpf_probe_read_kernel(&event.ts, sizeof(event.ts), (void*)(&ns));
-    events.perf_submit((void*)ctx, (void*)&event, sizeof(event));
+    events.perf_submit((void*)ctx, &event, sizeof(struct exec_event));
     return 0;
 }

@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "fs.h": "cpp"
+        "fs.h": "cpp",
+        "typeinfo": "cpp",
+        "*.inc": "cpp"
     }
 }
