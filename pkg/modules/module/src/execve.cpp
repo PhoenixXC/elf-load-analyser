@@ -10,7 +10,7 @@ TDATA(ret_sys_execve,
     int8_t ret; 
 );
 
-TDATA(call_sys_execve, );
+TDATA(call_sys_execve, TEMPTY);
 
 BPF_PERF_OUTPUT(call_events);
 BPF_PERF_OUTPUT(ret_events);

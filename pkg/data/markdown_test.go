@@ -26,5 +26,3 @@ func TestTable(t *testing.T) {
     tb.AddRow("4", "David", "boy", "444444")
     fmt.Println(tb.String())
 }
-
-

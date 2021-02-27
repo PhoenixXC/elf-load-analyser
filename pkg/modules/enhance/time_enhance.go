@@ -13,7 +13,7 @@ const (
 )
 
 func init() {
-    modules.RegisteredEnhancer("time_amend",&timeEnhance{})
+    modules.RegisteredEnhancer("time_amend", &timeEnhance{})
 }
 
 type TimeEvent interface {

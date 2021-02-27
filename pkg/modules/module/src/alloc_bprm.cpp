@@ -6,11 +6,10 @@
 #include "common.h"
 
 TDATA(alloc_bprm_event, 
-    char filename[256];
-    char fdpath[256];
-    char interp[256];
+    char filename[256]; 
+    char fdpath[256]; char interp[256];
     uint64_t cur_top_of_mem;
-    uint64_t rlim_cur;
+    uint64_t rlim_cur; 
     uint64_t rlim_max;
 );
 BPF_PERF_OUTPUT(events);
