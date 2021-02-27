@@ -86,19 +86,15 @@ func (m *Monitor) DoAction() (*bpf.Module, bool) {
         fd, err := (*action).Load(module)
         if err != nil {
             log.Warnf("Failed to load event %v, %v", *event, err)
+        } else if err = (*action).Attach(module, fd); err != nil {
+            log.Warnf("Failed to attach event %v, %v", *event, err)
         }
+
         if err == nil {
-            if err = (*action).Attach(module, fd); err != nil {
-                log.Warnf("Failed to attach event %v, %v", *event, err)
-            }
+            goOn = true
+        } else if m.IsEnd() {
+            log.Errorf("The necessary monitor %q start failed", m.Name)
         }
-        if err != nil {
-            if m.IsEnd() {
-                log.Errorf("The necessary monitor %q start failed", m.Name)
-            }
-            continue
-        }
-        goOn = true
     }
     return module, goOn
 }
