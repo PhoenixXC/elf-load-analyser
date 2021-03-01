@@ -10,20 +10,20 @@ import (
 type Level int8
 
 const (
-    debugLevel Level = iota
-    infoLevel
-    warnLevel
-    errorLevel
+    dLevel Level = iota
+    iLevel
+    wLevel
+    eLevel
 )
 
 var (
-    currentLevel = infoLevel
+    currentLevel = iLevel
     defaultFlags = log.Lmicroseconds | log.Ltime
 
-    debugLogger logger = newBaseLogger(debugLevel, os.Stdout, "DEBUG ", defaultFlags)
-    infoLogger  logger = newBaseLogger(infoLevel, os.Stdout, "INFO ", defaultFlags)
-    warnLogger  logger = newBaseLogger(warnLevel, os.Stdout, "WARN ", defaultFlags).SetHandle(warn)
-    errorLogger logger = newBaseLogger(errorLevel, os.Stderr, "ERROR ", defaultFlags).SetHandle(err)
+    debugLogger logger = newBaseLogger(dLevel, os.Stdout, "DEBUG ", defaultFlags)
+    infoLogger  logger = newBaseLogger(iLevel, os.Stdout, "INFO  ", defaultFlags)
+    warnLogger  logger = newBaseLogger(wLevel, os.Stdout, "WARN  ", defaultFlags).SetHandle(warn)
+    errorLogger logger = newBaseLogger(eLevel, os.Stderr, "ERROR ", defaultFlags).SetHandle(err)
 )
 
 type logger interface {
@@ -42,13 +42,13 @@ func SetConfigLevel(l string) {
     }
     switch l {
     case "debug":
-        currentLevel = debugLevel
+        currentLevel = dLevel
     case "info":
-        currentLevel = infoLevel
+        currentLevel = iLevel
     case "warn":
-        currentLevel = warnLevel
+        currentLevel = wLevel
     case "error":
-        currentLevel = errorLevel
+        currentLevel = eLevel
     default:
         log.Fatalf("Invalid log level %q", l)
     }
