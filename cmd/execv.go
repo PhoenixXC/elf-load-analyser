@@ -1,8 +1,11 @@
 package main
 
 import (
+    "flag"
     "fmt"
     "github.com/phoenixxc/elf-load-analyser/pkg/log"
+    "os/user"
+    "strconv"
 
     "os"
     "os/signal"
@@ -16,9 +19,8 @@ const (
 )
 
 type execCtx struct {
-    execArgs string
-    uid      int
-    gid      int
+    args string
+    user string
 }
 
 func childProcess(execPath string) {
@@ -40,8 +42,8 @@ func childProcess(execPath string) {
 }
 
 func buildProcess(ctx execCtx) int {
-    execArgs := ctx.execArgs
-    uid, gid := ctx.uid, ctx.gid
+    execArgs := ctx.args
+    uid, gid := getUidGid(ctx.user)
 
     args := os.Args
     pwd, err := os.Getwd()
@@ -76,4 +78,20 @@ func wakeChild(childPID int) {
     if err != nil {
         log.Errorf("Wake child process error, %v", err)
     }
+}
+
+func getUidGid(username string) (uid, gid int) {
+    s := strings.TrimSpace(username)
+    if len(s) != 0 {
+        u, err := user.Lookup(s)
+        if err == nil {
+            uid, _ := strconv.Atoi(u.Uid)
+            gid, _ := strconv.Atoi(u.Gid)
+            return uid, gid
+        }
+        fmt.Println("Invalid user")
+    }
+    flag.Usage()
+    os.Exit(1)
+    return
 }

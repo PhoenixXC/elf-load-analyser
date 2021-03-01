@@ -31,19 +31,19 @@ func (e *ElfRender) Render() (*data.AnalyseData, error) {
         return nil, err
     }
 
-    fHeader := markdown.NewContent().WithTitle(markdown.H3Level, "ELF File Header").WithContents(e.buildHeader(eFile))
-    fProgHeader := markdown.NewContent().WithTitle(markdown.H3Level, "ELF Prog Header").WithContents(e.buildProgramHeader(eFile))
-    h2 := markdown.NewContent().WithTitle(markdown.H2Level, "ELF").Append(fHeader).Append(fProgHeader)
+    fHeader := markdown.NewTitleContents(markdown.H3, "ELF File Header").Append(e.buildHeader(eFile))
+    fProgHeader := markdown.NewTitleContents(markdown.H3, "ELF Prog Header").Append(e.buildProgHeader(eFile))
+    h2 := markdown.NewTitleContents(markdown.H2, "ELF").Append(fHeader).Append(fProgHeader)
 
     // program header
-    return data.NewAnalyseData(string(e.Type()), data.newData(data.MarkdownType, h2.ToMarkdown())), nil
+    return data.NewAnalyseData(string(e.Type()), h2), nil
 }
 
 func (e *ElfRender) Type() Type {
     return ElfType
 }
 
-func (e *ElfRender) buildHeader(f *elf.File) string {
+func (e *ElfRender) buildHeader(f *elf.File) markdown.Interface {
     header := f.FileHeader
 
     table := markdown.NewTable("MEMBER", "VALUE").
@@ -58,10 +58,10 @@ func (e *ElfRender) buildHeader(f *elf.File) string {
         AddRow("Machine", header.Machine.String()).
         AddRow("Version", header.Version.String()).
         AddRow("Entry", addrConvert(header.Entry))
-    return table.ToMarkdown()
+    return markdown.Interface(table)
 }
 
-func (e *ElfRender) buildProgramHeader(f *elf.File) string {
+func (e *ElfRender) buildProgHeader(f *elf.File) markdown.Interface {
     ph := f.Progs
 
     table := markdown.NewTable("Type", "Offset", "FileSize", "VirtAddr", "MemSize", "PhysAddr", "Flags", "Align").
@@ -70,7 +70,7 @@ func (e *ElfRender) buildProgramHeader(f *elf.File) string {
         table.AddRow(prog.Type.String(), addrConvert(prog.Off), addrConvert(prog.Filesz), addrConvert(prog.Vaddr),
             addrConvert(prog.Memsz), addrConvert(prog.Paddr), prog.Flags.String(), addrConvert(prog.Align))
     }
-    return table.ToMarkdown()
+    return markdown.Interface(table)
 }
 
 func addrConvert(addr uint64) string {

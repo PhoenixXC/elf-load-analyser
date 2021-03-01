@@ -27,7 +27,7 @@ type execveatComEvent struct {
 func (e execveatComEvent) Render() *data.AnalyseData {
     s := data.TrimBytes2Str(e.Filename[:])
     msg := fmt.Sprintf("fd = %d, flags = %d, filename = %s", e.Fd, e.Flags, s)
-    return data.NewAnalyseData(monitorName, markdown.NewContent().WithContents(msg))
+    return data.NewAnalyseData(monitorName, markdown.NewTextContent(msg))
 }
 
 type doExecveatCommon struct {

@@ -6,7 +6,6 @@ import (
     "github.com/phoenixxc/elf-load-analyser/pkg/env"
     "os"
     "runtime"
-    "strings"
 )
 
 type EnvRender struct{}
@@ -16,16 +15,14 @@ func NewEnvRender() *EnvRender {
 }
 
 func (e *EnvRender) Render() (*data.AnalyseData, error) {
-    thisTitle := string(e.Type())
+    title:= string(e.Type())
 
-    sysItem := markdown.NewContent().WithTitle(markdown.H3Level, "系统").WithContents(env.GetSysOS())
-    archItem := markdown.NewContent().WithTitle(markdown.H3Level, "平台").WithContents(runtime.GOARCH)
-    environItem := markdown.NewContent().WithTitle(markdown.H3Level, "环境变量").WithContents(strings.Join(os.Environ(), ";"))
-    envItem := markdown.NewContent().WithTitle(markdown.H2Level, "环境").
-        Append(sysItem).
-        Append(archItem).
-        Append(environItem)
-    return data.NewAnalyseData(thisTitle, data.newData(data.MarkdownType, envItem.ToMarkdown())), nil
+    envContent := markdown.NewTitleContents(markdown.H2, "环境").
+        Append(markdown.NewTitleContents(markdown.H3, "系统").WithContents(env.GetSysOS())).
+        Append(markdown.NewTitleContents(markdown.H3, "平台").WithContents(runtime.GOARCH)).
+        Append(markdown.NewTitleContents(markdown.H3, "环境变量").
+            Append(markdown.NewList(os.Environ()...)))
+    return data.NewAnalyseData(title, envContent), nil
 }
 
 func (e *EnvRender) Type() Type {

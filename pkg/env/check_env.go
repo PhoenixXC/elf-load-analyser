@@ -29,7 +29,7 @@ func CheckEnv() {
         func(expected, actual interface{}) bool {
             return actual.(string) >= expected.(string)
         },
-        "Kernel version too slow, linux kernel version 4.1 or newer is required\n"+
+        "Kernel version too old, linux kernel version 4.1 or newer is required\n"+
             "You can see \"https://github.com/iovisor/bcc/blob/master/INSTALL.md\"",
     )
 
@@ -60,7 +60,7 @@ for more information, see "https://github.com/iovisor/bcc/blob/master/INSTALL.md
 `)
 
     // Check if bcc is installed
-    log.Infof(log.Emphasize("The program depend on bcc, please make sure you had install bcc, "+
+    log.Infof(log.Emphasize("The program depend on bcc, please make sure you have installed bcc, "+
         "for more information, see %q"), "https://github.com/iovisor/bcc/blob/master/INSTALL.md")
     binary, lookErr := exec.LookPath("bcc")
     if lookErr != nil {

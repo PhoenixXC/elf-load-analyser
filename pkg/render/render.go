@@ -16,3 +16,7 @@ type Render interface {
     Render() (*data.AnalyseData, error)
     Type() Type
 }
+
+type Content struct {
+    Filepath string
+}

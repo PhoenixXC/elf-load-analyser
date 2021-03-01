@@ -1,18 +1,12 @@
 package main
 
 import (
-    "encoding/json"
     "flag"
-    "fmt"
     "github.com/phoenixxc/elf-load-analyser/pkg/bcc"
-    "github.com/phoenixxc/elf-load-analyser/pkg/env"
     "github.com/phoenixxc/elf-load-analyser/pkg/factory"
     "github.com/phoenixxc/elf-load-analyser/pkg/log"
     _ "github.com/phoenixxc/elf-load-analyser/pkg/modules/module"
-    "os/user"
-    "strconv"
-    "strings"
-
+    "github.com/phoenixxc/elf-load-analyser/pkg/render"
     "golang.org/x/sys/unix"
     "os"
     "path/filepath"
@@ -26,10 +20,10 @@ var (
 )
 
 func init() {
-    flag.StringVar(&execPath, "e", "", "the analyse program path")
-    flag.StringVar(&execArgStr, "p", "", "the analyse program parameter, split by space")
-    flag.StringVar(&execUser, "u", "", "the analyse program run user")
-    flag.StringVar(&logLevel, "l", "", "log level:info debug warn error")
+    flag.StringVar(&execUser, "u", "", "run user")
+    flag.StringVar(&execPath, "e", "", "program path")
+    flag.StringVar(&logLevel, "l", "", "log level (info debug warn error)")
+    flag.StringVar(&execArgStr, "p", "", "transform program parameter, split by space")
 
     flag.Parse()
 }
@@ -44,40 +38,16 @@ func main() {
     }
 
     checkFlag()
-    u, g := getUidGid(execUser)
-    env.CheckEnv()
+    render.PreAnalyse(render.Content{Filepath: execPath})
 
     // fork, get pid, block until receive signal
-    childPID := buildProcess(execCtx{
-        execArgs: execArgStr,
-        uid:      u,
-        gid:      g,
-    })
-
+    childPID := buildProcess(execCtx{args: execArgStr, user: execUser})
     // bcc handler update, hook pid, load modules, begin hook
-    ok := make(chan struct{})
-    pool := factory.LoadMonitors(bcc.Context{Pid: childPID}, ok)
+    pool, _ := factory.LoadMonitors(bcc.Context{Pid: childPID})
     // wake up chile to exec binary
     wakeChild(childPID)
 
-    // wait until data collection ok
-    <-ok
-    d := pool.Data()
-    for _, analyseData := range d {
-        // Just for debug
-        d, _ := json.Marshal(analyseData)
-        fmt.Println(string(d))
-    }
-
-    // cache load detail data, render use html(use graphviz build images, if no graphviz, show code use <code> tag)
-    // save html to disk
-    // render data result
-
-    // optional: start web server show message
-
-    // optional: start to monitor dynamic link at real time, use websocket
-    // if start web server, wait server exit, if not, save html and exit
-    //time.Sleep(1 * time.Hour)
+    render.VisualAnalyseData(pool, true)
 }
 
 func checkFlag() {
@@ -94,20 +64,4 @@ func checkFlag() {
     if err := unix.Access(execPath, unix.X_OK); err != nil {
         log.Errorf("Check %q error, %v", execPath, err)
     }
-}
-
-func getUidGid(username string) (uid, gid int) {
-    s := strings.TrimSpace(username)
-    if len(s) != 0 {
-        u, err := user.Lookup(s)
-        if err == nil {
-            uid, _ := strconv.Atoi(u.Uid)
-            gid, _ := strconv.Atoi(u.Gid)
-            return uid, gid
-        }
-        fmt.Println("Invalid user")
-    }
-    flag.Usage()
-    os.Exit(1)
-    return
 }
