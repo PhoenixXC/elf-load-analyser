@@ -9,10 +9,10 @@ import (
 type ItemLevel uint8
 
 const (
-    H1Level = ItemLevel(iota + 1)
-    H2Level
-    H3Level
-    H4Level
+    H1 = ItemLevel(iota + 1)
+    H2
+    H3
+    H4
 )
 
 type Interface interface {
@@ -46,6 +46,14 @@ func NewContent() *Content {
     return c
 }
 
+func NewTitleContents(level ItemLevel, title string) *Content {
+    return NewContent().WithTitle(level, title)
+}
+
+func NewTextContent(content ...string) *Content {
+    return NewContent().WithContents(content...)
+}
+
 func (m *Content) WithTitle(level ItemLevel, title string) *Content {
     m.level = level
     m.title = title
@@ -58,12 +66,7 @@ func (m *Content) WithContents(content ...string) *Content {
 }
 
 func (m *Content) Append(am Interface) *Content {
-    nm := &Content{
-        level:   m.level,
-        title:   m.title,
-        content: m.content + am.ToMarkdown(),
-    }
-    return nm
+    return NewContent().WithTitle(m.level, m.title).WithContents(m.content + am.ToMarkdown())
 }
 
 func (m *Content) ToMarkdown() string {
