@@ -5,6 +5,7 @@ import (
     "fmt"
     "github.com/phoenixxc/elf-load-analyser/pkg/bcc"
     "github.com/phoenixxc/elf-load-analyser/pkg/data"
+    "github.com/phoenixxc/elf-load-analyser/pkg/data/markdown"
     "github.com/phoenixxc/elf-load-analyser/pkg/modules"
     "github.com/phoenixxc/elf-load-analyser/pkg/modules/enhance"
 )
@@ -25,9 +26,8 @@ type execveatComEvent struct {
 
 func (e execveatComEvent) Render() *data.AnalyseData {
     s := data.TrimBytes2Str(e.Filename[:])
-    msg := fmt.Sprintf("Do `%s` function, with fd = %d, flags = %d, filename = %s\n",
-        "do_execveat_common", e.Fd, e.Flags, s)
-    return data.NewAnalyseData(monitorName, data.NewData(data.MarkdownType, msg))
+    msg := fmt.Sprintf("fd = %d, flags = %d, filename = %s", e.Fd, e.Flags, s)
+    return data.NewAnalyseData(monitorName, markdown.NewContent().WithContents(msg))
 }
 
 type doExecveatCommon struct {

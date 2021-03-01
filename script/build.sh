@@ -64,9 +64,9 @@ while (($# > 0)); do
 done
 
 if [ "${gc_flags}" ]; then
-  echo "Debug mode, disable other feature"
-  rm_extra_symbol=0
-  compress_level=0
+    echo "Debug mode, disable other feature"
+    rm_extra_symbol=0
+    compress_level=0
 fi
 
 echo "Bcc source dir: ${SRC_DIR}"
@@ -79,20 +79,20 @@ cd "${GO_WORK}" || exit
 echo "Build binary..."
 mkdir -p "target"
 if [ "${rm_extra_symbol}" -ne 0 ]; then
-  ld_flags="-s -w"
+    ld_flags="-s -w"
 fi
 go build -gcflags="${gc_flags}" -ldflags "${ld_flags}" -o target/"${TARGET}" github.com/phoenixxc/elf-load-analyser/cmd
 
 # compressed
 if [ "${compress_level}" -ne 0 ]; then
-  cd target || exit
-  target_bin="${TARGET}-compressed"
-  echo "Clean old binary"
-  rm -- "${target_bin}"
-  echo "Compressed..."
-  upx "-${compress_level}" -o "${target_bin}" "${TARGET}"
-  rm -- "${TARGET}"
-  cd "${GO_WORK}" || exit
+    cd target || exit
+    target_bin="${TARGET}-compressed"
+    echo "Clean old binary"
+    rm -- "${target_bin}"
+    echo "Compressed..."
+    upx "-${compress_level}" -o "${target_bin}" "${TARGET}"
+    rm -- "${TARGET}"
+    cd "${GO_WORK}" || exit
 fi
 
 echo "Build ok, now you can use '$(pwd)/target/${target_bin}' run program"

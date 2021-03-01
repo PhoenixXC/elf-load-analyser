@@ -6,6 +6,7 @@ import (
     bpf "github.com/iovisor/gobpf/bcc"
     "github.com/phoenixxc/elf-load-analyser/pkg/bcc"
     "github.com/phoenixxc/elf-load-analyser/pkg/data"
+    "github.com/phoenixxc/elf-load-analyser/pkg/data/markdown"
     "github.com/phoenixxc/elf-load-analyser/pkg/modules"
     "github.com/phoenixxc/elf-load-analyser/pkg/modules/enhance"
 )
@@ -15,7 +16,7 @@ type sysExecveEvent struct {
 }
 
 func (e sysExecveEvent) Render() *data.AnalyseData {
-    return data.NewAnalyseData("syscall:execve", data.NewData(data.MarkdownType, "start call"))
+    return data.NewAnalyseData("syscall:execve", markdown.NewContent().WithContents("start call"))
 }
 
 type sysExecveRetEvent struct {
@@ -28,7 +29,7 @@ func (s sysExecveRetEvent) Render() *data.AnalyseData {
     if s.Ret != 0 {
         return data.NewErrAnalyseData(item, data.RuntimeError, fmt.Sprintf("execve failed, return %d", s.Ret))
     }
-    return data.NewAnalyseData(item, data.NewData(data.MarkdownType, "execve success"))
+    return data.NewAnalyseData(item, markdown.NewContent().WithContents("execve success"))
 }
 
 //go:embed src/execve.cpp.k

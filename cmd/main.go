@@ -1,10 +1,10 @@
 package main
 
 import (
+    "encoding/json"
     "flag"
     "fmt"
     "github.com/phoenixxc/elf-load-analyser/pkg/bcc"
-    "github.com/phoenixxc/elf-load-analyser/pkg/data"
     "github.com/phoenixxc/elf-load-analyser/pkg/env"
     "github.com/phoenixxc/elf-load-analyser/pkg/factory"
     "github.com/phoenixxc/elf-load-analyser/pkg/log"
@@ -65,14 +65,8 @@ func main() {
     d := pool.Data()
     for _, analyseData := range d {
         // Just for debug
-        fmt.Println(analyseData.Timestamp(), analyseData.Name(),
-            func() interface{} {
-                if analyseData.Status() == data.Success {
-                    return analyseData.Data().Data
-                }
-                return analyseData.Desc()
-            }(),
-        )
+        d, _ := json.Marshal(analyseData)
+        fmt.Println(string(d))
     }
 
     // cache load detail data, render use html(use graphviz build images, if no graphviz, show code use <code> tag)

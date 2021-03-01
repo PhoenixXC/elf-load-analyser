@@ -5,6 +5,7 @@ import (
     "fmt"
     "github.com/phoenixxc/elf-load-analyser/pkg/bcc"
     "github.com/phoenixxc/elf-load-analyser/pkg/data"
+    "github.com/phoenixxc/elf-load-analyser/pkg/data/markdown"
     "github.com/phoenixxc/elf-load-analyser/pkg/modules"
     "github.com/phoenixxc/elf-load-analyser/pkg/modules/enhance"
 )
@@ -25,11 +26,11 @@ type allocBprmEvent struct {
 }
 
 func (a allocBprmEvent) Render() *data.AnalyseData {
-    s := fmt.Sprintf("after `%v`, filename: %q, fdpath: %q, interp: %q, rlimit stack cur: 0x%X,"+
-        " rlimit stack max: 0x%X, current of top mem: 0x%X\n",
-        "alloc_bprm", data.TrimBytes2Str(a.Filename[:]), data.TrimBytes2Str(a.Fdpath[:]), data.TrimBytes2Str(a.Interp[:]),
+    s := fmt.Sprintf("filename: %q, fdpath: %q, interp: %q, rlimit stack cur: 0x%X,"+
+        " rlimit stack max: 0x%X, current of top mem: 0x%X",
+        data.TrimBytes2Str(a.Filename[:]), data.TrimBytes2Str(a.Fdpath[:]), data.TrimBytes2Str(a.Interp[:]),
         a.RlimCur, a.RlimMax, a.CurTopOfMem)
-    return data.NewAnalyseData("alloc_bprm", data.NewData(data.MarkdownType, s))
+    return data.NewAnalyseData("alloc_bprm", markdown.NewContent().WithContents(s))
 }
 
 type allocBprm struct {

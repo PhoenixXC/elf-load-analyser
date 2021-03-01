@@ -18,7 +18,7 @@ func (p *Pool) Len() int {
 }
 
 func (p *Pool) Less(i, j int) bool {
-    return p.data[i].Timestamp().Before(p.data[j].Timestamp())
+    return p.data[i].Timestamp.Before(p.data[j].Timestamp)
 }
 
 func (p *Pool) Swap(i, j int) {
