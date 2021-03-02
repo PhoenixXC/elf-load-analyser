@@ -10,10 +10,11 @@ import (
 const (
     StartMark       = "_START_"
     kernelBootNsKey = "_ns_"
+    enhancerName    = "time_amend"
 )
 
 func init() {
-    modules.RegisteredEnhancer("time_amend", &timeEnhance{})
+    modules.RegisteredEnhancer(enhancerName, &timeEnhance{})
 }
 
 type TimeEvent interface {
@@ -47,7 +48,7 @@ func (t timeEnhance) AfterHandle(tCtx *modules.TableCtx,
     if v, ok := aData.Extra(kernelBootNsKey); ok {
         ns, e := strconv.ParseUint(v, 10, 64)
         if e != nil {
-            log.Warnf("%s can not convert %q data, %v", "timeEnhance", kernelBootNsKey, e)
+            log.Warnf("%s can not convert %q data, %v", enhancerName, kernelBootNsKey, e)
             return aData, err
         }
         if tCtx.IsMark(StartMark) {

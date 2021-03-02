@@ -195,7 +195,7 @@ func initPerMaps(m *bpf.Module, p *PerfResolveMonitorModule) []*bpf.PerfMap {
         t := bpf.NewTable(m.TableId(table), m)
         perf, err := bpf.InitPerfMap(t, p.table2Ctx[table].channel, nil)
         if err != nil {
-            log.Errorf("(%s, %s) Failed to init perf map: %v\n", p.Monitor(), "events", err)
+            log.Errorf("(%s, %s) Failed to init perf map: %v", p.Monitor(), "events", err)
         }
         perfMaps[perI] = perf
         perI++

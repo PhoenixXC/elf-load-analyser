@@ -65,9 +65,8 @@ func ModuleInit(mm MonitorModule, end bool) {
 func Render(d []byte, event EventResult, enhance bool) (*data.AnalyseData, error) {
     err := binary.Read(bytes.NewBuffer(d), bpf.GetHostByteOrder(), event)
     if err != nil {
-        e := fmt.Errorf("Failed to decode received data to %q: %w",
+        return nil, fmt.Errorf("Failed to decode received data to %q, %w\n",
             reflect.TypeOf(event).Name(), err)
-        return nil, e
     }
     aData := event.Render()
     if enhance {

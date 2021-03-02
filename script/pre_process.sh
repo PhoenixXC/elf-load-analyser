@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # used by golang run and debug
 
 source ./merge.sh

@@ -1,5 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -u
+source ./util.sh
 source ./merge.sh
 
 readonly TARGET="ela"
@@ -88,10 +89,12 @@ if [ "${compress_level}" -ne 0 ]; then
     cd target || exit
     target_bin="${TARGET}-compressed"
     echo "Clean old binary"
-    rm -- "${target_bin}"
+    rm_suffix "${target_bin}"
+
     echo "Compressed..."
     upx "-${compress_level}" -o "${target_bin}" "${TARGET}"
-    rm -- "${TARGET}"
+
+    rm_suffix "${TARGET}"
     cd "${GO_WORK}" || exit
 fi
 
@@ -99,4 +102,4 @@ echo "Build ok, now you can use '$(pwd)/target/${target_bin}' run program"
 
 cd "${SRC_DIR}" || exit
 echo "Clean tmp files"
-rm -- *."${OUT_SUFFIX}"
+rm_suffix "${OUT_SUFFIX}"

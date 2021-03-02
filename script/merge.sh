@@ -1,9 +1,11 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+source ./util.sh
 
 readonly OUT_SUFFIX="k"
 
 function merge_src() {
-    ls -- *."${OUT_SUFFIX}" >/dev/null 2>&1 && rm -- *."${OUT_SUFFIX}"
+    rm_suffix "${OUT_SUFFIX}"
     for line in *.cpp
     do
         grep -E '^#include[[:blank:]]+"[[:print:]]+"$' "${line}" | awk '{print $2}' | tr -d '"' \

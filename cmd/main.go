@@ -37,7 +37,7 @@ func main() {
         childProcess(transExecPath)
     }
 
-    checkFlag()
+    checkArgs()
     render.PreAnalyse(render.Content{Filepath: execPath})
 
     // fork, get pid, block until receive signal
@@ -50,7 +50,7 @@ func main() {
     render.VisualAnalyseData(pool, true)
 }
 
-func checkFlag() {
+func checkArgs() {
     if len(execPath) == 0 {
         flag.Usage()
         os.Exit(1)
