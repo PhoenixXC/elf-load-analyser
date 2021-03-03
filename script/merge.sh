@@ -5,7 +5,7 @@ source ./util.sh
 readonly OUT_SUFFIX="k"
 
 function merge_src() {
-    rm_suffix "${OUT_SUFFIX}"
+    rm_file "*.${OUT_SUFFIX}"
     for line in *.cpp
     do
         grep -E '^#include[[:blank:]]+"[[:print:]]+"$' "${line}" | awk '{print $2}' | tr -d '"' \

@@ -146,15 +146,16 @@ func (p *PerfResolveMonitorModule) Resolve(m *bpf.Module, ch chan<- *data.Analys
 
 func dataProcessing(d []byte, ctx *TableCtx, ch chan<- *data.AnalyseData) {
     for name, handler := range registeredEnhancer {
-        log.Debugf("%q pre handle", name)
+        log.Debugf("%s pre handle for %q", name, ctx.name)
         handler.PreHandle(ctx)
     }
 
     log.Infof("Resolve %q...", ctx.name)
     analyseData, err := ctx.handler(d)
+    log.Debugf("Receive data from %q, %v", ctx.name, analyseData)
 
     for name, handler := range registeredEnhancer {
-        log.Debugf("%q after handle", name)
+        log.Debugf("%s after handle for %q", name, ctx.name)
         analyseData, err = handler.AfterHandle(ctx, analyseData, err)
     }
 

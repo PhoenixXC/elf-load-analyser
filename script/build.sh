@@ -89,12 +89,12 @@ if [ "${compress_level}" -ne 0 ]; then
     cd target || exit
     target_bin="${TARGET}-compressed"
     echo "Clean old binary"
-    rm_suffix "${target_bin}"
+    rm_file "${target_bin}"
 
     echo "Compressed..."
     upx "-${compress_level}" -o "${target_bin}" "${TARGET}"
 
-    rm_suffix "${TARGET}"
+    rm_file "${TARGET}"
     cd "${GO_WORK}" || exit
 fi
 
@@ -102,4 +102,4 @@ echo "Build ok, now you can use '$(pwd)/target/${target_bin}' run program"
 
 cd "${SRC_DIR}" || exit
 echo "Clean tmp files"
-rm_suffix "${OUT_SUFFIX}"
+rm_file "*.${OUT_SUFFIX}"
