@@ -1,0 +1,14 @@
+[
+  {
+    "key": "Program",
+    "val": "ELA"
+  },
+  {
+    "key": "Description",
+    "val": "ELF Load Analyser"
+  },
+  {
+    "key": "Version",
+    "val": "0.0.1"
+  }
+]

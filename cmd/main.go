@@ -37,6 +37,7 @@ func main() {
         childProcess(transExecPath)
     }
 
+    EchoBanner()
     checkArgs()
     render.PreAnalyse(render.Content{Filepath: execPath})
 
