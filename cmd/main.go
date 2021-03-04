@@ -37,8 +37,8 @@ func main() {
         childProcess(transExecPath)
     }
 
-    EchoBanner()
     checkArgs()
+    EchoBanner()
     render.PreAnalyse(render.Content{Filepath: execPath})
 
     // fork, get pid, block until receive signal

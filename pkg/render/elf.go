@@ -20,7 +20,7 @@ func NewElfRender(filepath string) *ElfRender {
     return &ElfRender{filepath: filepath}
 }
 
-func (e *ElfRender) Render() (*data.AnalyseData, error) {
+func (e *ElfRender) Render() (d *data.AnalyseData, err error) {
     // file header
     f, err := os.Open(e.filepath)
     if err != nil {
@@ -33,10 +33,12 @@ func (e *ElfRender) Render() (*data.AnalyseData, error) {
 
     fHeader := markdown.NewTitleContents(markdown.H3, "ELF File Header").Append(e.buildHeader(eFile))
     fProgHeader := markdown.NewTitleContents(markdown.H3, "ELF Prog Header").Append(e.buildProgHeader(eFile))
-    h2 := markdown.NewTitleContents(markdown.H2, "ELF").Append(fHeader).Append(fProgHeader)
+    content := fHeader.Append(fProgHeader)
 
     // program header
-    return data.NewAnalyseData(string(e.Type()), h2), nil
+    t := e.Type()
+    d = data.NewAnalyseData(t.Name, content).WithId(t.Id)
+    return
 }
 
 func (e *ElfRender) Type() Type {

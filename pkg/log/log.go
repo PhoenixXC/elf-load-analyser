@@ -20,10 +20,10 @@ var (
     currentLevel = iLevel
     defaultFlags = log.Lmicroseconds | log.Ltime
 
-    debugLogger logger = newBaseLogger(dLevel, os.Stdout, "DEBUG ", defaultFlags)
-    infoLogger  logger = newBaseLogger(iLevel, os.Stdout, "INFO  ", defaultFlags)
-    warnLogger  logger = newBaseLogger(wLevel, os.Stdout, "WARN  ", defaultFlags).SetHandle(warn)
-    errorLogger logger = newBaseLogger(eLevel, os.Stderr, "ERROR ", defaultFlags).SetHandle(err)
+    debugLogger logger = newBaseLogger(dLevel, os.Stdout, "D ", defaultFlags).SetHandle(minor)
+    infoLogger  logger = newBaseLogger(iLevel, os.Stdout, "I ", defaultFlags)
+    warnLogger  logger = newBaseLogger(wLevel, os.Stdout, "W ", defaultFlags).SetHandle(warn)
+    errorLogger logger = newBaseLogger(eLevel, os.Stderr, "E ", defaultFlags).SetHandle(err)
 )
 
 type logger interface {

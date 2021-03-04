@@ -15,14 +15,12 @@ func NewEnvRender() *EnvRender {
 }
 
 func (e *EnvRender) Render() (*data.AnalyseData, error) {
-    title:= string(e.Type())
+    t := e.Type()
 
-    envContent := markdown.NewTitleContents(markdown.H2, "环境").
-        Append(markdown.NewTitleContents(markdown.H3, "系统").WithContents(env.GetSysOS())).
+    envContent := markdown.NewTitleContents(markdown.H3, "系统").WithContents(env.GetSysOS()).
         Append(markdown.NewTitleContents(markdown.H3, "平台").WithContents(runtime.GOARCH)).
-        Append(markdown.NewTitleContents(markdown.H3, "环境变量").
-            Append(markdown.NewList(os.Environ()...)))
-    return data.NewAnalyseData(title, envContent), nil
+        Append(markdown.NewTitleContents(markdown.H3, "环境变量").Append(markdown.NewList(os.Environ()...)))
+    return data.NewAnalyseData(t.Name, envContent).WithId(t.Id), nil
 }
 
 func (e *EnvRender) Type() Type {

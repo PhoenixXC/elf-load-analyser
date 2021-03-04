@@ -89,7 +89,7 @@ func getUidGid(username string) (uid, gid int) {
             gid, _ := strconv.Atoi(u.Gid)
             return uid, gid
         }
-        fmt.Println("Invalid user")
+        log.Error("Invalid user")
     }
     flag.Usage()
     os.Exit(1)

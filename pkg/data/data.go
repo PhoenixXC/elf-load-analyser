@@ -42,8 +42,9 @@ func newData(b Builder) *Data {
 }
 
 type AnalyseData struct {
-    Status    Status         `json:"status"`
+    Id        string         `json:"id"`
     Name      string         `json:"name"`
+    Status    Status         `json:"status"`
     Desc      string         `json:"desc"`
     Timestamp time.Time      `json:"timestamp"`
     Data      *Data          `json:"render_data"`
@@ -64,9 +65,16 @@ func NewAnalyseData(name string, builder Builder) *AnalyseData {
         Timestamp: time.Now(), extra: map[string]string{}}
 }
 
-func NewListAnalyseData(name string, dataList []*AnalyseData) *AnalyseData {
-    return &AnalyseData{Name: name, Status: Success, DataList: dataList, Desc: statusDesc(Success),
-        Timestamp: time.Now(), extra: map[string]string{}}
+func NewListAnalyseData(id string, name string, dataList []*AnalyseData) *AnalyseData {
+    return &AnalyseData{
+        Id:        id,
+        Name:      name,
+        Status:    Success,
+        DataList:  dataList,
+        Desc:      statusDesc(Success),
+        Timestamp: time.Now(),
+        extra:     map[string]string{},
+    }
 }
 
 func NewErrAnalyseData(name string, s Status, desc string) *AnalyseData {
@@ -79,13 +87,8 @@ func NewErrAnalyseData(name string, s Status, desc string) *AnalyseData {
     return &AnalyseData{Status: s, Desc: desc, Timestamp: time.Now(), Name: name, extra: map[string]string{}}
 }
 
-func (a *AnalyseData) SetTime(t time.Time) *AnalyseData {
-    a.Timestamp = t
-    return a
-}
-
-func (a *AnalyseData) SetDesc(desc string) *AnalyseData {
-    a.Desc = desc
+func (a *AnalyseData) WithId(id string) *AnalyseData {
+    a.Id = id
     return a
 }
 

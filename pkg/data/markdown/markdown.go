@@ -66,7 +66,13 @@ func (m *Content) WithContents(content ...string) *Content {
 }
 
 func (m *Content) Append(am Interface) *Content {
-    return NewContent().WithTitle(m.level, m.title).WithContents(m.content + am.ToMarkdown())
+    appendContent := am.ToMarkdown()
+    var buf bytes.Buffer
+    buf.Grow(len(m.content) + len(appendContent))
+    buf.WriteString(m.content)
+    buf.WriteString(appendContent)
+
+    return NewContent().WithTitle(m.level, m.title).WithContents(buf.String())
 }
 
 func (m *Content) ToMarkdown() string {

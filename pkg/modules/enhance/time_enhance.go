@@ -54,7 +54,7 @@ func (t timeEnhance) AfterHandle(tCtx *modules.TableCtx,
         if tCtx.IsMark(StartMark) {
             SendNs(NewNsMap(ns))
         } else {
-            aData.SetTime(AmendTime(ns))
+            aData.Timestamp = AmendTime(ns)
         }
     }
     return aData, err

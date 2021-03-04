@@ -11,12 +11,10 @@ func NewAnalyseRender(dataList []*data.AnalyseData) *AnalyseRender {
 }
 
 func (a AnalyseRender) Render() (*data.AnalyseData, error) {
-    return data.NewListAnalyseData(string(a.Type()), a.dataList), nil
+    t := a.Type()
+    return data.NewListAnalyseData(t.Id, t.Name, a.dataList), nil
 }
 
 func (a AnalyseRender) Type() Type {
     return AnalyseType
 }
-
-
-
