@@ -17,20 +17,28 @@ import (
 )
 
 type cmdArgs struct {
-    path     string // exec file path
-    args     string // exec args
-    user     string // exec user
-    level    string
-    uid, gid int
+    path          string // exec file path
+    args          string // exec args
+    user          string // exec user
+    level         string
+    uid, gid      int
+    in, out, eOut string // child process input and output
+    iFd, oFd, eFd uintptr
 }
 
-var cmd = &cmdArgs{}
+var (
+    cmd          = &cmdArgs{}
+    closeHandler []func()
+)
 
 func init() {
     flag.StringVar(&cmd.user, "u", "", "run user")
     flag.StringVar(&cmd.path, "e", "", "program path")
-    flag.StringVar(&cmd.level, "l", "", "log level (info debug warn error)")
-    flag.StringVar(&cmd.args, "p", "", "transform program parameter, split by space")
+    flag.StringVar(&cmd.in, "i", "", "(optional) target program input")
+    flag.StringVar(&cmd.out, "o", "", "(optional) target program output")
+    flag.StringVar(&cmd.eOut, "eo", "", "(optional) target program error output")
+    flag.StringVar(&cmd.level, "l", "", "(optional) log level (info debug warn error)")
+    flag.StringVar(&cmd.args, "p", "", "(optional) transform program parameter, split by space")
 
     flag.Parse()
 }
@@ -44,6 +52,16 @@ func main() {
     wakeChild(childPID)
 
     render.VisualAnalyseData(pool, true)
+    closeHandle()
+}
+
+func closeHandle() {
+    if len(closeHandler) == 0 {
+        return
+    }
+    for _, f := range closeHandler {
+        f()
+    }
 }
 
 func preProcessing(c *cmdArgs) {
@@ -83,6 +101,8 @@ func treatingArgs(c *cmdArgs) {
 
     // user check
     c.uid, c.gid = getUidGid(c.user)
+    // input output
+    c.iFd, c.oFd, c.eFd = getIOFd(c.in, c.out, c.eOut)
 }
 
 func getUidGid(username string) (uid, gid int) {
@@ -99,4 +119,34 @@ func getUidGid(username string) (uid, gid int) {
     flag.Usage()
     os.Exit(1)
     return
+}
+
+func getIOFd(in, out, eOut string) (iFd, outFd, eFd uintptr) {
+    iFd, outFd, eFd = 0, 1, 2
+    if len(in) > 0 {
+        iFd = getFd(in, true)
+    }
+    if len(out) > 0 {
+        outFd = getFd(out, false)
+    }
+    if len(eOut) > 0 {
+        eFd = getFd(eOut, false)
+    }
+    return
+}
+
+func getFd(file string, read bool) uintptr {
+    var f *os.File
+    var e error
+    if read {
+        f, e = os.Open(file)
+    } else {
+        f, e = os.OpenFile(file, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
+    }
+    if e != nil {
+        closeHandle()
+        log.Errorf("Get file fd: %v", e)
+    }
+    closeHandler = append(closeHandler, func() { f.Close() })
+    return f.Fd()
 }

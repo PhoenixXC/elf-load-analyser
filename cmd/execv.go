@@ -23,7 +23,6 @@ func childProcess(execPath string) {
     argsEnv, _ := os.LookupEnv(ChildArgsFlag)
     execArgs := []string{execPath}
     execArgs = append(execArgs, strings.Fields(argsEnv)...)
-    log.Infof("Boot binary %q with \"%v\" to analyse load data...", execPath, execArgs)
     if err := syscall.Exec(execPath, execArgs, os.Environ()); err != nil {
         log.Errorf("Call binary failed, %v", err)
     }
@@ -52,7 +51,7 @@ func buildProcess(ctx *cmdArgs) int {
                 Gid: uint32(ctx.gid),
             },
         },
-        Files: []uintptr{0, 1, 2},
+        Files: []uintptr{cmd.iFd, cmd.oFd, cmd.eFd},
     })
     if err != nil {
         log.Errorf("Create process failed, %v", err)
