@@ -20,7 +20,7 @@ func (e *EnvRender) Render() (*data.AnalyseData, error) {
     envContent := markdown.NewTitleContents(markdown.H3, "系统").WithContents(env.GetSysOS()).
         Append(markdown.NewTitleContents(markdown.H3, "平台").WithContents(runtime.GOARCH)).
         Append(markdown.NewTitleContents(markdown.H3, "环境变量").Append(markdown.NewList(os.Environ()...)))
-    return data.NewAnalyseData(t.Name, envContent).WithId(t.Id), nil
+    return data.NewAnalyseData(t.Name, envContent).WithID(t.Id), nil
 }
 
 func (e *EnvRender) Type() Type {

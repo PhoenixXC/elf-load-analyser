@@ -37,7 +37,7 @@ func (e *ElfRender) Render() (d *data.AnalyseData, err error) {
 
     // program header
     t := e.Type()
-    d = data.NewAnalyseData(t.Name, content).WithId(t.Id)
+    d = data.NewAnalyseData(t.Name, content).WithID(t.Id)
     return
 }
 

@@ -36,9 +36,9 @@ func ConfigLevel() Level {
     return currentLevel
 }
 
-func SetConfigLevel(l string) {
+func SetConfigLevel(l string) error {
     if len(l) == 0 {
-        return
+        return nil
     }
     switch l {
     case "debug":
@@ -50,8 +50,9 @@ func SetConfigLevel(l string) {
     case "error":
         currentLevel = eLevel
     default:
-        log.Fatalf("Invalid log level %q", l)
+        return fmt.Errorf("Invalid log level %q\n", l)
     }
+    return nil
 }
 
 type baseLogger struct {

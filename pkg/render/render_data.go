@@ -5,15 +5,12 @@ import (
     "encoding/json"
     "errors"
     "github.com/phoenixxc/elf-load-analyser/pkg/data"
-    "github.com/phoenixxc/elf-load-analyser/pkg/env"
     "github.com/phoenixxc/elf-load-analyser/pkg/log"
 )
 
 var dataCenter = make([]*data.AnalyseData, 3)
 
 func PreAnalyse(ctx Content) {
-    // pre check
-    env.CheckEnv()
     // env
     d, _ := NewEnvRender().Render()
     dataCenter[0] = d

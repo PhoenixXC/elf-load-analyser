@@ -46,7 +46,7 @@ func LoadMonitors(ctx bcc.Context) (p *data.Pool, ok <-chan struct{}) {
         if m, g := monitor.DoAction(); g {
             cnt++
             go func(o chan struct{}) {
-                log.Infof("Monitor %s start...", monitor.Name)
+                log.Infof("Monitor %q start...", monitor.Name)
                 monitor.Resolve(m, ch, ready, ok)
                 if monitor.IsEnd() && !flag {
                     close(o)

@@ -1,7 +1,7 @@
 package data
 
 import (
-    "log"
+    "github.com/phoenixxc/elf-load-analyser/pkg/log"
     "time"
 )
 
@@ -42,7 +42,7 @@ func newData(b Builder) *Data {
 }
 
 type AnalyseData struct {
-    Id        string         `json:"id"`
+    ID        string         `json:"id"`
     Name      string         `json:"name"`
     Status    Status         `json:"status"`
     Desc      string         `json:"desc"`
@@ -67,7 +67,7 @@ func NewAnalyseData(name string, builder Builder) *AnalyseData {
 
 func NewListAnalyseData(id string, name string, dataList []*AnalyseData) *AnalyseData {
     return &AnalyseData{
-        Id:        id,
+        ID:        id,
         Name:      name,
         Status:    Success,
         DataList:  dataList,
@@ -79,7 +79,7 @@ func NewListAnalyseData(id string, name string, dataList []*AnalyseData) *Analys
 
 func NewErrAnalyseData(name string, s Status, desc string) *AnalyseData {
     if s == Success {
-        log.Fatalf("Error Status cannnot be OK")
+        log.Error("Error Status cannot be OK")
     }
     if len(desc) == 0 {
         desc = statusDesc(s)
@@ -87,8 +87,8 @@ func NewErrAnalyseData(name string, s Status, desc string) *AnalyseData {
     return &AnalyseData{Status: s, Desc: desc, Timestamp: time.Now(), Name: name, extra: map[string]string{}}
 }
 
-func (a *AnalyseData) WithId(id string) *AnalyseData {
-    a.Id = id
+func (a *AnalyseData) WithID(id string) *AnalyseData {
+    a.ID = id
     return a
 }
 

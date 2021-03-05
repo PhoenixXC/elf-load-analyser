@@ -59,11 +59,11 @@ you can check your kernel config use cmd "zcat /proc/config.gz | zgrep '^[^#].*B
 for more information, see "https://github.com/iovisor/bcc/blob/master/INSTALL.md#kernel-configuration"
 `)
 
-    // Check if bcc is installed
-    log.Infof(log.Emphasize("The program depend on bcc, please make sure you have installed bcc, "+
-        "for more information, see %q"), "https://github.com/iovisor/bcc/blob/master/INSTALL.md")
     binary, lookErr := exec.LookPath("bcc")
     if lookErr != nil {
+        // Check if bcc is installed
+        log.Infof(log.Emphasize("The program depend on bcc, please make sure you have installed bcc, "+
+            "for more information, see %q"), "https://github.com/iovisor/bcc/blob/master/INSTALL.md")
         log.Errorf("Bcc cannot find, %v", lookErr)
     }
     log.Infof("Found bcc: %q", binary)
