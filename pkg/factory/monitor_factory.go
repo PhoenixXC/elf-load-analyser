@@ -4,10 +4,12 @@ import (
     "github.com/phoenixxc/elf-load-analyser/pkg/bcc"
     "github.com/phoenixxc/elf-load-analyser/pkg/data"
     "github.com/phoenixxc/elf-load-analyser/pkg/log"
+    "sync"
     "time"
 )
 
 var (
+    mutex sync.Mutex
     factory []*bcc.Monitor
 )
 
@@ -52,7 +54,10 @@ func LoadMonitors(ctx bcc.Context) (p *data.Pool, ok <-chan struct{}) {
                     close(o)
                     endFlag = true
                 }
-                defer m.Close()
+                log.Debugf("Close monitor: %q", monitor.Name)
+                mutex.Lock()
+                defer mutex.Unlock()
+                m.Close()
             }(o)
         }
     }
