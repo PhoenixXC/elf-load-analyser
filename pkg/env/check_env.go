@@ -36,9 +36,9 @@ func CheckEnv() {
     // Check kernel config
     helper.WithTip(requiredConfigs, GetKernelConfigs(),
         func(expected, actual interface{}) bool {
-            kernelConfigs := actual.(map[string]bool)
+            kernelConfigs := actual.(map[string]struct{})
             for _, entry := range expected.([]string) {
-                if !kernelConfigs[entry] {
+                if _, ok := kernelConfigs[entry]; !ok {
                     return false
                 }
             }
