@@ -17,3 +17,8 @@ function merge_src() {
         sed '/^[[:blank:]]*#include[[:blank:]]\+"[[:print:]]\+"$/d' "${line}" | cat >> "${line}"."${OUT_SUFFIX}"
     done
 }
+
+function build_fronted() {
+    yarn
+    yarn build
+}

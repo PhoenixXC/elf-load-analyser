@@ -7,6 +7,7 @@ readonly TARGET="ela"
 readonly WORK_DIR=$(pwd)
 readonly GO_WORK="${WORK_DIR}/../"
 readonly SRC_DIR="${WORK_DIR}/../pkg/modules/module/src"
+readonly FRONTED_DIR="${WORK_DIR}/../pkg/web/template"
 
 readonly ARG_ERR=100
 readonly VAL_ERR=101
@@ -75,6 +76,9 @@ echo "Bcc source dir: ${SRC_DIR}"
 cd "${SRC_DIR}" || exit
 echo "Merge files"
 merge_src
+echo "Build fronted"
+cd "${FRONTED_DIR}" || exit
+build_fronted
 
 cd "${GO_WORK}" || exit
 echo "Build binary..."
