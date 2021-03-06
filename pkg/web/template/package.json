@@ -22,6 +22,7 @@
   "dependencies": {
     "@ant-design/pro-layout": "^6.5.0",
     "@umijs/preset-react": "1.x",
+    "file-loader": "^6.2.0",
     "rsuite": "^4.9.2",
     "umi": "^3.3.9"
   },

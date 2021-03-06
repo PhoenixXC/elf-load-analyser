@@ -2,10 +2,10 @@ package render
 
 import (
     "debug/elf"
-    "encoding/json"
     "errors"
     "github.com/phoenixxc/elf-load-analyser/pkg/data"
     "github.com/phoenixxc/elf-load-analyser/pkg/log"
+    "github.com/phoenixxc/elf-load-analyser/pkg/web"
 )
 
 var dataCenter = make([]*data.AnalyseData, 3)
@@ -27,13 +27,10 @@ func PreAnalyse(ctx Content) {
     dataCenter[1] = d
 }
 
-// VisualAnalyseData 数据展示，若 show 为 true，开启 web 服务展示数据，否则持久化数据到硬盘上
-func VisualAnalyseData(p *data.Pool, show bool)  {
+// VisualAnalyseData 数据展示
+func VisualAnalyseData(p *data.Pool) {
     renderedData := doAnalyse(p)
-    for _, analyseData := range renderedData {
-        d, _ := json.Marshal(analyseData)
-        log.Info(string(d))
-    }
+    go web.StartWebService(renderedData)
 }
 
 func doAnalyse(p *data.Pool) []*data.AnalyseData {

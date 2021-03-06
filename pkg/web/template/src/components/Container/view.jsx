@@ -8,22 +8,26 @@ import { NavHeader } from '../NavHeader';
 
 import './index.css';
 
-const Container = () => {
+const PanelList = (props) => {
+  const pannelNum = props.renderList;
+}
+
+const Container = (props) => {
   return (
-    <div>
+    <div className={'container'}>
       <Affix>
         <NavHeader />
       </Affix>
       <div className='content'>
         <PanelGroup>
-          <Panel header='Panel 1'>
-            <p>panel 1</p>
+          <Panel header='系统环境'>
+            <p>系统环境</p>
           </Panel>
-          <Panel header='Panel 2'>
-            <p>panel 2</p>
+          <Panel header='文件格式'>
+            <p>文件格式</p>
           </Panel>
-          <Panel header='Panel 3'>
-            <p>panel 3</p>
+          <Panel header='加载过程'>
+            <p>加载过程</p>
           </Panel>
         </PanelGroup>
       </div>

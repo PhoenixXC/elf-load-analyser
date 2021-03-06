@@ -10,6 +10,7 @@ import (
     "github.com/phoenixxc/elf-load-analyser/pkg/render"
     "golang.org/x/sys/unix"
     "os"
+    "os/signal"
     "os/user"
     "path/filepath"
     "strconv"
@@ -51,8 +52,14 @@ func main() {
     pool, _ := factory.LoadMonitors(bcc.Context{Pid: childPID})
     wakeChild(childPID)
 
-    render.VisualAnalyseData(pool, true)
-    closeHandle()
+    render.VisualAnalyseData(pool)
+
+    log.Info(log.Emphasize("Press [CTRL+C] to exit"))
+    exit := make(chan os.Signal, 1)
+    signal.Notify(exit, os.Interrupt, os.Kill)
+    <-exit
+
+    defer closeHandle()
 }
 
 func closeHandle() {
