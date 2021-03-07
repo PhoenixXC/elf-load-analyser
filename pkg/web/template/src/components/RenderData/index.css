@@ -1,0 +1,89 @@
+/* Li */
+
+.render-data li {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow-x: hidden;
+  margin-left: -35px;
+}
+
+.render-data li::before {
+  content: "\02022";
+  color: #b3b3b3;
+  line-height: 25px;
+  font-style: normal;
+  padding-right: 5px;
+  text-decoration: none;
+}
+
+.render-data li::marker {
+  display: none !important;
+}
+
+/* Popover */
+
+.rs-popover-content {
+  max-width: 60vh;
+  word-break: break-word;
+}
+
+.rs-popover {
+  max-width: 60vh;
+}
+
+.rs-popover.fade.in.placement-top {
+  left: 40vh !important;
+}
+
+/* Table */
+
+table {
+  word-break: break-all;
+  width: 100%;
+  table-layout: fixed;
+}
+
+thead tr th {
+  color: #6c6c6c;
+}
+
+thead tr {
+  /* -webkit-box-shadow: 3px 0 5px rgb(9 9 9 / 8%); */
+  box-shadow: 0 4px 5px -2px rgba(9 9 9 0.08);
+}
+
+tr {
+  border-bottom: 1px solid #f2f2f5;
+  height: 40px;
+}
+
+td {
+  padding: 10px;
+}
+
+th {
+  padding: 10px;
+}
+
+table ~ p {
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+/* Base */
+
+h2 {
+  font-size: 18px;
+}
+
+h3 {
+  font-size: 16px;
+}
+
+h4 {
+  font-size: inherit;
+}
+
+* {
+  font-family: monospace;
+}

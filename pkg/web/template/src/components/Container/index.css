@@ -7,5 +7,18 @@
 }
 
 .rs-panel-heading {
-  font-size: large;
+  font-size: 26px;
+  padding-bottom: 0;
+}
+
+.rs-panel-heading::after {
+  content: '';
+  display: block;
+  position: relative;
+  background: #3353cf;
+  opacity: .25;
+  border-radius: 15px;
+  bottom: 10px;
+  width: 40px;
+  height: 11px;
 }

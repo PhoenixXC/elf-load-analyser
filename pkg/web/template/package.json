@@ -22,7 +22,8 @@
   "dependencies": {
     "@ant-design/pro-layout": "^6.5.0",
     "@umijs/preset-react": "1.x",
-    "file-loader": "^6.2.0",
+    "react-markdown": "^5.0.3",
+    "remark-gfm": "^1.0.0",
     "rsuite": "^4.9.2",
     "umi": "^3.3.9"
   },
@@ -32,6 +33,7 @@
     "@umijs/test": "^3.3.9",
     "lint-staged": "^10.0.7",
     "prettier": "^2.2.0",
+    "prop-types": "^15.7.2",
     "react": "17.x",
     "react-dom": "17.x",
     "typescript": "^4.1.2",
