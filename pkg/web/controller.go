@@ -18,7 +18,7 @@ func StartWebService(d []*data.AnalyseData) {
     if err != nil {
         log.Errorf("Cannot select port to start wev server: %v", err)
     }
-    log.Infof(log.Emphasize("Start web service on %s, you can view analyse report use this link"), addr)
+    log.Infof(log.Emphasize("Start web service on %s, click to view Analyse Report"), "http://"+addr)
 
     http.Handle("/", FrontedService())
     http.HandleFunc("/api/analyse_report", AnalyseReportService)
@@ -29,7 +29,7 @@ func StartWebService(d []*data.AnalyseData) {
 }
 
 func getAnyFreePort() (string, error) {
-    addr, err := net.ResolveTCPAddr("tcp", "0.0.0.0:0")
+    addr, err := net.ResolveTCPAddr("tcp", "localhost:0")
     if err != nil {
         return "", err
     }

@@ -25,6 +25,7 @@ type cmdArgs struct {
     uid, gid      int
     in, out, eOut string // child process input and output
     iFd, oFd, eFd uintptr
+    autoOpen      bool
 }
 
 var (
