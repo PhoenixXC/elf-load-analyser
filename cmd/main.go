@@ -36,9 +36,9 @@ var (
 func init() {
     flag.StringVar(&cmd.user, "u", "", "run user")
     flag.StringVar(&cmd.path, "e", "", "program path")
-    flag.StringVar(&cmd.in, "i", "", "(optional) target program input")
-    flag.StringVar(&cmd.out, "o", "", "(optional) target program output")
-    flag.StringVar(&cmd.eOut, "eo", "", "(optional) target program error output")
+    flag.StringVar(&cmd.in, "in", "", "(optional) target program input")
+    flag.StringVar(&cmd.out, "out", "", "(optional) target program output")
+    flag.StringVar(&cmd.eOut, "err", "", "(optional) target program error output")
     flag.StringVar(&cmd.level, "l", "", "(optional) log level (info debug warn error)")
     flag.StringVar(&cmd.args, "p", "", "(optional) transform program parameter, split by space")
 

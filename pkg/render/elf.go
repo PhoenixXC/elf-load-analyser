@@ -55,7 +55,7 @@ func (e *ElfRender) buildHeader(f *elf.File) markdown.Interface {
         AddRow("ByteOrder", header.ByteOrder.String()).
         AddRow("Version", header.Version.String()).
         AddRow("Os/ABI", header.OSABI.String()).
-        AddRow("ABI Version", string(header.ABIVersion)).
+        AddRow("ABI Version", strconv.Itoa(int(header.ABIVersion))).
         AddRow("Type", header.Type.String()).
         AddRow("Machine", header.Machine.String()).
         AddRow("Version", header.Version.String()).

@@ -16,7 +16,6 @@ func NewEnvRender() *EnvRender {
 
 func (e *EnvRender) Render() (*data.AnalyseData, error) {
     t := e.Type()
-
     envContent := markdown.NewTitleContents(markdown.H3, "系统").WithContents(env.GetSysOS()).
         Append(markdown.NewTitleContents(markdown.H3, "平台").WithContents(runtime.GOARCH)).
         Append(markdown.NewTitleContents(markdown.H3, "环境变量").Append(markdown.NewList(os.Environ()...)))

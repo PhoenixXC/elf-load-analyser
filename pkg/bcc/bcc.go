@@ -88,8 +88,7 @@ func (m *Monitor) DoAction() (*bpf.Module, bool) {
             log.Warnf("Failed to load event %v, %v", *event, err)
         } else if err = action.Attach(module, fd); err != nil {
             log.Warnf("Failed to attach event %v, %v", *event, err)
-        }
-        if err == nil {
+        } else {
             continue
         }
 

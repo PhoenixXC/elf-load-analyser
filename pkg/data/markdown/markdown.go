@@ -34,15 +34,17 @@ func (m Markdown) Data() string {
 // Content simple context
 type Content struct {
     Markdown
-    level   ItemLevel
-    title   string
-    content string
+    level         ItemLevel
+    title         string
+    content       string
+    appendContent []string
 }
 
 // NewContent 创建 markdown内容块
 func NewContent() *Content {
     c := &Content{}
     c.Markdown.Interface = c
+    c.appendContent = []string{}
     return c
 }
 
@@ -61,18 +63,13 @@ func (m *Content) WithTitle(level ItemLevel, title string) *Content {
 }
 
 func (m *Content) WithContents(content ...string) *Content {
-    m.content += strings.Join(content, "\n\n")
+    m.content = strings.Join(content, "\n\n")
     return m
 }
 
 func (m *Content) Append(am Interface) *Content {
-    appendContent := am.ToMarkdown()
-    var buf bytes.Buffer
-    buf.Grow(len(m.content) + len(appendContent))
-    buf.WriteString(m.content)
-    buf.WriteString(appendContent)
-
-    return NewContent().WithTitle(m.level, m.title).WithContents(buf.String())
+    m.appendContent = append(m.appendContent, am.ToMarkdown())
+    return m
 }
 
 func (m *Content) ToMarkdown() string {
@@ -86,8 +83,13 @@ func (m *Content) ToMarkdown() string {
         buf.WriteString(m.title)
         buf.WriteString("\n\n")
     }
-    buf.WriteString(m.content)
-    buf.WriteString("\n\n")
+    if len(m.content) > 0 {
+        buf.WriteString(m.content)
+        buf.WriteString("\n\n")
+    }
+    if len(m.appendContent) > 0 {
+        buf.WriteString(strings.Join(m.appendContent, ""))
+    }
     return buf.String()
 }
 
