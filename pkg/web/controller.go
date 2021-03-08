@@ -5,41 +5,55 @@ import (
     "github.com/phoenixxc/elf-load-analyser/pkg/log"
     "net"
     "net/http"
+    "strconv"
+    "time"
 )
 
 var (
     analyseDataCenter []*data.AnalyseData
 )
 
-func StartWebService(d []*data.AnalyseData) {
+func StartWebService(d []*data.AnalyseData, port uint) {
     analyseDataCenter = d
 
-    addr, err := getAnyFreePort()
+    addr, err := getAnyFreeAddr(port)
     if err != nil {
         log.Errorf("Cannot select port to start wev server: %v", err)
     }
-    log.Infof(log.Emphasize("Start web service on %s, click to view Analyse Report"), "http://"+addr)
+    go func() {
+        // NOTE sleep to boot http serve boot finish
+        time.Sleep(10 * time.Millisecond)
+        log.Infof(log.Emphasize("Start web service on %s, click to view Analyse Report"), "http://"+addr)
+    }()
 
     http.Handle("/", FrontedService())
-    http.HandleFunc("/api/analyse_report", AnalyseReportService)
+    http.HandleFunc("/api/report", AnalyseReportService)
     err = http.ListenAndServe(addr, nil)
     if err != nil {
         log.Errorf("Start web service failed, %v", err)
     }
 }
 
-func getAnyFreePort() (string, error) {
-    addr, err := net.ResolveTCPAddr("tcp", "localhost:0")
-    if err != nil {
-        return "", err
+func getAnyFreeAddr(port uint) (string, error) {
+    if port != 0 {
+        return "0.0.0.0:" + strconv.Itoa(int(port)), nil
     }
 
-    listener, err := net.ListenTCP("tcp", addr)
+    var listener *net.TCPListener
+    var addr *net.TCPAddr
+    var err error
+
+    if addr, err = net.ResolveTCPAddr("tcp", "0.0.0.0:0"); err != nil {
+        listener, err = net.ListenTCP("tcp", addr)
+    }
     if err != nil {
         return "", err
     }
 
     defer func() {
+        if listener == nil {
+            return
+        }
         e := listener.Close()
         if e != nil {
             log.Errorf("Release random port error, %v", e)

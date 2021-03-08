@@ -28,9 +28,9 @@ func PreAnalyse(ctx Content) {
 }
 
 // VisualAnalyseData 数据展示
-func VisualAnalyseData(p *data.Pool) {
+func VisualAnalyseData(p *data.Pool, port uint) {
     renderedData := doAnalyse(p)
-    go web.StartWebService(renderedData)
+    go web.StartWebService(renderedData, port)
 }
 
 func doAnalyse(p *data.Pool) []*data.AnalyseData {

@@ -15,6 +15,7 @@ import (
     "path/filepath"
     "strconv"
     "strings"
+    "syscall"
 )
 
 type cmdArgs struct {
@@ -25,7 +26,7 @@ type cmdArgs struct {
     uid, gid      int
     in, out, eOut string // child process input and output
     iFd, oFd, eFd uintptr
-    autoOpen      bool
+    port          uint
 }
 
 var (
@@ -34,13 +35,14 @@ var (
 )
 
 func init() {
-    flag.StringVar(&cmd.user, "u", "", "run user")
-    flag.StringVar(&cmd.path, "e", "", "program path")
+    flag.StringVar(&cmd.user, "user", "", "run user")
+    flag.StringVar(&cmd.path, "exec", "", "program path")
     flag.StringVar(&cmd.in, "in", "", "(optional) target program input")
     flag.StringVar(&cmd.out, "out", "", "(optional) target program output")
     flag.StringVar(&cmd.eOut, "err", "", "(optional) target program error output")
-    flag.StringVar(&cmd.level, "l", "", "(optional) log level (info debug warn error)")
-    flag.StringVar(&cmd.args, "p", "", "(optional) transform program parameter, split by space")
+    flag.UintVar(&cmd.port, "port", 0, "(optional) web server port, default use random port")
+    flag.StringVar(&cmd.level, "log", "", "(optional) log level(info debug warn error), default: info")
+    flag.StringVar(&cmd.args, "arg", "", "(optional) transform program parameter, split by space, default: ''")
 
     flag.Parse()
 }
@@ -53,11 +55,11 @@ func main() {
     pool, _ := factory.LoadMonitors(bcc.Context{Pid: childPID})
     wakeChild(childPID)
 
-    render.VisualAnalyseData(pool)
+    render.VisualAnalyseData(pool, cmd.port)
 
     log.Info(log.Emphasize("Press [CTRL+C] to exit"))
     exit := make(chan os.Signal, 1)
-    signal.Notify(exit, os.Interrupt, os.Kill)
+    signal.Notify(exit, os.Interrupt, syscall.SIGTERM)
     <-exit
 
     defer closeHandle()
