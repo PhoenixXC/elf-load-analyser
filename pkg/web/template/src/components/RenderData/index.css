@@ -32,7 +32,7 @@
 }
 
 .rs-popover.fade.in.placement-top {
-  left: 40vh !important;
+  left: 20vh !important;
 }
 
 /* Table */
@@ -49,7 +49,7 @@ thead tr th {
 
 thead tr {
   /* -webkit-box-shadow: 3px 0 5px rgb(9 9 9 / 8%); */
-  box-shadow: 0 4px 5px -2px rgba(9 9 9 0.08);
+  box-shadow: 0 4px 5px -2px rgba(9, 9, 9, 0.08);
 }
 
 tr {
@@ -68,6 +68,21 @@ th {
 table ~ p {
   padding-top: 20px;
   padding-bottom: 20px;
+}
+
+small::before {
+  content: '!';
+  background: #45f68d;
+  color: white;
+  border-radius: 50%;
+  height: 15px;
+  width: 15px;
+  text-align: center;
+  font-size: 5px;
+  margin-left: 5px;
+  margin-right: 5px;
+  font-weight: bolder;
+  display: inline-block;
 }
 
 /* Base */

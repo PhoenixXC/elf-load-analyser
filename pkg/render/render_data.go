@@ -5,10 +5,9 @@ import (
     "errors"
     "github.com/phoenixxc/elf-load-analyser/pkg/data"
     "github.com/phoenixxc/elf-load-analyser/pkg/log"
-    "github.com/phoenixxc/elf-load-analyser/pkg/web"
 )
 
-var dataCenter = make([]*data.AnalyseData, 3)
+var dataCenter = make([]*Data, 3)
 
 func PreAnalyse(ctx Content) {
     // env
@@ -27,13 +26,7 @@ func PreAnalyse(ctx Content) {
     dataCenter[1] = d
 }
 
-// VisualAnalyseData 数据展示
-func VisualAnalyseData(p *data.Pool, port uint) {
-    renderedData := doAnalyse(p)
-    go web.StartWebService(renderedData, port)
-}
-
-func doAnalyse(p *data.Pool) []*data.AnalyseData {
+func DoAnalyse(p *data.Pool) []*Data {
     render := NewAnalyseRender(p.Data())
     if d, err := render.Render(); err != nil {
         log.Errorf("Render analyse data error, %v", err)

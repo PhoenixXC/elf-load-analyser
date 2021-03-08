@@ -18,14 +18,14 @@ func FrontedService() http.Handler {
 }
 
 func autoAppendPrefix(prefix string, h http.Handler) http.Handler {
-    return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request){
+    return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
         if strings.HasPrefix(req.URL.Path, apiPrefix) {
             h.ServeHTTP(w, req)
             return
         }
 
         var index string
-        if "/" == req.URL.Path {
+        if req.URL.Path == "/" {
             index = "/index.html"
         }
 

@@ -8,6 +8,7 @@ import (
     "github.com/phoenixxc/elf-load-analyser/pkg/log"
     _ "github.com/phoenixxc/elf-load-analyser/pkg/modules/module"
     "github.com/phoenixxc/elf-load-analyser/pkg/render"
+    "github.com/phoenixxc/elf-load-analyser/pkg/web"
     "golang.org/x/sys/unix"
     "os"
     "os/signal"
@@ -55,7 +56,7 @@ func main() {
     pool, _ := factory.LoadMonitors(bcc.Context{Pid: childPID})
     wakeChild(childPID)
 
-    render.VisualAnalyseData(pool, cmd.port)
+    web.VisualAnalyseData(pool, cmd.port)
 
     log.Info(log.Emphasize("Press [CTRL+C] to exit"))
     exit := make(chan os.Signal, 1)

@@ -78,7 +78,7 @@ echo "Merge files"
 merge_src
 echo "Build fronted"
 cd "${FRONTED_DIR}" || exit
-build_fronted
+build_fronted || exit
 
 cd "${GO_WORK}" || exit
 echo "Build binary..."
@@ -86,7 +86,8 @@ mkdir -p "target"
 if [ "${rm_extra_symbol}" -ne 0 ]; then
     ld_flags="-s -w"
 fi
-go build -gcflags="${gc_flags}" -ldflags "${ld_flags}" -o target/"${TARGET}" github.com/phoenixxc/elf-load-analyser/cmd
+go build -gcflags="${gc_flags}" -ldflags "${ld_flags}" -o target/"${TARGET}" \
+    github.com/phoenixxc/elf-load-analyser/cmd || exit
 
 # compressed
 if [ "${compress_level}" -ne 0 ]; then
@@ -96,7 +97,7 @@ if [ "${compress_level}" -ne 0 ]; then
     rm_file "${target_bin}"
 
     echo "Compressed..."
-    upx "-${compress_level}" -o "${target_bin}" "${TARGET}"
+    upx "-${compress_level}" -o "${target_bin}" "${TARGET}" || exit
 
     rm_file "${TARGET}"
     cd "${GO_WORK}" || exit

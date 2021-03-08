@@ -20,7 +20,7 @@ func NewElfRender(filepath string) *ElfRender {
     return &ElfRender{filepath: filepath}
 }
 
-func (e *ElfRender) Render() (d *data.AnalyseData, err error) {
+func (e *ElfRender) Render() (d *Data, err error) {
     // file header
     f, err := os.Open(e.filepath)
     if err != nil {
@@ -37,7 +37,7 @@ func (e *ElfRender) Render() (d *data.AnalyseData, err error) {
 
     // program header
     t := e.Type()
-    d = data.NewAnalyseData(t.Name, content).WithID(t.Id)
+    d = NewData(data.NewAnalyseData(t.Name, content).WithID(t.Id))
     return
 }
 

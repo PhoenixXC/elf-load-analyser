@@ -9,7 +9,7 @@ import (
 )
 
 var (
-    mutex sync.Mutex
+    mutex   sync.Mutex
     factory []*bcc.Monitor
 )
 

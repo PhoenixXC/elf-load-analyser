@@ -42,14 +42,13 @@ func newData(b Builder) *Data {
 }
 
 type AnalyseData struct {
-    ID        string         `json:"id"`
-    Name      string         `json:"name"`
-    Status    Status         `json:"status"`
-    Desc      string         `json:"desc"`
-    Timestamp time.Time      `json:"timestamp"`
-    Data      *Data          `json:"render_data"`
-    DataList  []*AnalyseData `json:"render_data_list"`
-    Style     string         `json:"style"`
+    ID        string
+    Name      string
+    Status    Status
+    Desc      string
+    Timestamp time.Time
+    Data      *Data
+    DataList  []*AnalyseData
     extra     map[string]string
 }
 

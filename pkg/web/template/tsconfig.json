@@ -1,18 +1,19 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "module": "esnext",
+    "module": "CommonJS",
     "moduleResolution": "node",
     "importHelpers": true,
     "jsx": "react-jsx",
     "esModuleInterop": true,
     "sourceMap": true,
-    "baseUrl": "./",
+    "baseUrl": ".",
     "strict": true,
     "paths": {
       "@/*": ["src/*"],
       "@@/*": ["src/.umi/*"]
     },
+    "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true
   },
   "include": [

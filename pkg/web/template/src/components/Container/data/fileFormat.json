@@ -1,0 +1,8 @@
+{
+  "name": "系统环境",
+  "status": 0,
+  "desc": "",
+  "time": "",
+  "type": 1,
+  "data": "### ELF File Header\n\n|MEMBER|VALUE|\n|---|---|\n|Class|ELFCLASS64|\n|data|ELFDATA2LSB|\n|ByteOrder|LittleEndian|\n|Version|EV_CURRENT|\n|Os/ABI|ELFOSABI_NONE|\n|ABI Version|0|\n|Type|ET_DYN|\n|Machine|EM_X86_64|\n|Version|EV_CURRENT|\n|Entry|0X5b20|\n\n<small>table 1: file \"/bin/ls\" header, for more information, see: \"readelf -h ...\"</small>\n\n### ELF Prog Header\n\n|Type|Offset|FileSize|VirtAddr|MemSize|PhysAddr|Flags|Align|\n|---|---|---|---|---|---|---|---|\n|PT_PHDR|0X40|0X268|0X40|0X268|0X40|PF_R|0X8|\n|PT_INTERP|0X2a8|0X1c|0X2a8|0X1c|0X2a8|PF_R|0X1|\n|PT_LOAD|0X0|0X3510|0X0|0X3510|0X0|PF_R|0X1000|\n|PT_LOAD|0X4000|0X133d1|0X4000|0X133d1|0X4000|PF_X+PF_R|0X1000|\n|PT_LOAD|0X18000|0X8cc0|0X18000|0X8cc0|0X18000|PF_R|0X1000|\n|PT_LOAD|0X20fd0|0X1298|0X21fd0|0X2588|0X21fd0|PF_W+PF_R|0X1000|\n|PT_DYNAMIC|0X21a58|0X200|0X22a58|0X200|0X22a58|PF_W+PF_R|0X8|\n|PT_NOTE|0X2c4|0X44|0X2c4|0X44|0X2c4|PF_R|0X4|\n|PT_GNU_EH_FRAME|0X1d324|0X954|0X1d324|0X954|0X1d324|PF_R|0X4|\n|PT_GNU_STACK|0X0|0X0|0X0|0X0|0X0|PF_W+PF_R|0X10|\n|PT_GNU_RELRO|0X20fd0|0X1030|0X21fd0|0X1030|0X21fd0|PF_R|0X1|\n\n<small>table 2: file \"/bin/ls\" program headers, for more information, see: \"readelf -l ...\"</small>\n\n"
+}
