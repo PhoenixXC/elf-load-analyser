@@ -1,6 +1,23 @@
+@media (max-width: 449px) {
+  .content {
+    width: 100%;
+  }
+}
+
+@media (min-width: 450px) and (max-width: 620px) {
+  .content {
+    width: 90%;
+  }
+}
+
+@media (min-width: 621px) {
+  .content {
+    width: 80%;
+  }
+}
+
 .content {
   margin: auto;
-  width: 80%;
   min-height: 100vh;
   box-shadow: 0 4px 4px rgba(0, 0, 0, 0.12), 0 0 10px rgba(0, 0, 0, 0.06);
   background: white;

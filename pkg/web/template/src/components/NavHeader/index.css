@@ -14,3 +14,11 @@
   font-weight: bolder;
   font-size: 24px;
 }
+
+.rs-nav-item-content:hover {
+  background-color: #5060b6 !important;
+}
+
+.rs-nav-item-content:focus {
+  background-color: #5060b6 !important;
+}

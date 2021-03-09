@@ -38,9 +38,11 @@
 /* Table */
 
 table {
-  word-break: break-all;
   width: 100%;
+  min-width: 100%;
   table-layout: fixed;
+  overflow-x: auto;
+  display: block;
 }
 
 thead tr th {
@@ -77,12 +79,42 @@ small::before {
   border-radius: 50%;
   height: 15px;
   width: 15px;
+  font-size: 6px;
   text-align: center;
-  font-size: 5px;
   margin-left: 5px;
   margin-right: 5px;
   font-weight: bolder;
-  display: inline-block;
+  display: inline-flex;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -webkit-box-align: center;
+  overflow: hidden;
+  align-items: center;
+}
+
+/* Scrollbar */
+table::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+table::-webkit-scrollbar-track {
+  background: #f6f6f6;
+  border-radius: 2px;
+}
+
+table::-webkit-scrollbar-thumb {
+  background: #aaa;
+  border-radius: 2px;
+}
+
+table::-webkit-scrollbar-thumb:hover {
+  background: #747474;
+}
+
+table::-webkit-scrollbar-corner {
+  background: #f6f6f6;
 }
 
 /* Base */
