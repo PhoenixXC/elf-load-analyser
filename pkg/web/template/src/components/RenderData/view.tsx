@@ -7,7 +7,7 @@ import gfm from 'remark-gfm';
 
 import 'rsuite/lib/Popover/styles';
 import './index.css';
-import { RenderDataType } from './type/RenderData';
+import { ReportModelState } from '@/models/report';
 
 // @ts-ignore
 const renderListItem = ({ children }) => {
@@ -17,7 +17,7 @@ const renderListItem = ({ children }) => {
   return (
     <li>
       <Whisper placement='top' trigger='click' speaker={
-        <Popover title=''><span><b>{key}</b>{value}</span></Popover>
+        <Popover title={key}><span>{value.substring(1, value.length)}</span></Popover>
       }>
         <span><b>{key}</b>{value}</span>
       </Whisper>
@@ -29,7 +29,7 @@ const ListRender = {
   listItem: renderListItem,
 };
 
-const RenderData = (props: RenderDataType) => {
+const RenderData = (props: ReportModelState) => {
   let data = props.data ? props.data : 'None data';
   return (
     <Panel className={'render-data'} header={props.name}>

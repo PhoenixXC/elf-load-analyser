@@ -19,6 +19,7 @@ function merge_src() {
 }
 
 function build_fronted() {
+    export MOCK=none
     yarn
     yarn build
 }
