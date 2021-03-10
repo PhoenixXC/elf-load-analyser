@@ -37,7 +37,7 @@ func (e *ElfRender) Render() (d *Data, err error) {
 
     // program header
     t := e.Type()
-    d = NewData(data.NewAnalyseData(t.Name, content).WithID(t.Id))
+    d = NewData(data.NewAnalyseData(t.Name, content).WithID(t.ID))
     return
 }
 
@@ -60,7 +60,7 @@ func (e *ElfRender) buildHeader(f *elf.File) markdown.Interface {
         AddRow("Machine", header.Machine.String()).
         AddRow("Version", header.Version.String()).
         AddRow("Entry", addrConvert(header.Entry))
-    return markdown.Interface(table)
+    return table
 }
 
 func (e *ElfRender) buildProgHeader(f *elf.File) markdown.Interface {
@@ -72,7 +72,7 @@ func (e *ElfRender) buildProgHeader(f *elf.File) markdown.Interface {
         table.AddRow(prog.Type.String(), addrConvert(prog.Off), addrConvert(prog.Filesz), addrConvert(prog.Vaddr),
             addrConvert(prog.Memsz), addrConvert(prog.Paddr), prog.Flags.String(), addrConvert(prog.Align))
     }
-    return markdown.Interface(table)
+    return table
 }
 
 func addrConvert(addr uint64) string {

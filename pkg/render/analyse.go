@@ -14,7 +14,7 @@ func NewAnalyseRender(dataList []*data.AnalyseData) *AnalyseRender {
 
 func (a AnalyseRender) Render() (*Data, error) {
     t := a.Type()
-    return NewData(data.NewListAnalyseData(t.Id, t.Name, a.dataList)), nil
+    return NewData(data.NewListAnalyseData(t.ID, t.Name, a.dataList)), nil
 }
 
 func (a AnalyseRender) Type() Type {

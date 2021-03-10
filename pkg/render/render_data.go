@@ -33,5 +33,6 @@ func DoAnalyse(p *data.Pool) []*Data {
     } else {
         dataCenter[2] = d
     }
+    // NOTE use chain of responsibility
     return dataCenter
 }

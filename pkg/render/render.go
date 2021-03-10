@@ -7,14 +7,14 @@ import (
 )
 
 type Type struct {
-    Id   string
+    ID   string
     Name string
 }
 
 var (
-    ElfType     = Type{Id: "_ELF", Name: "文件格式"}
-    EnvType     = Type{Id: "_ENV", Name: "系统环境"}
-    AnalyseType = Type{Id: "_LOAD", Name: "加载过程"}
+    ElfType     = Type{ID: "_ELF", Name: "文件格式"}
+    EnvType     = Type{ID: "_ENV", Name: "系统环境"}
+    AnalyseType = Type{ID: "_LOAD", Name: "加载过程"}
 )
 
 type Render interface {
@@ -28,9 +28,9 @@ type Content struct {
 
 /* Reformat render data structure */
 
-type JsonTime time.Time
+type JSONTime time.Time
 
-func (t JsonTime) MarshalJSON() ([]byte, error) {
+func (t JSONTime) MarshalJSON() ([]byte, error) {
     stamp := fmt.Sprintf("\"%s\"", time.Time(t).Format("15:04:05.000000"))
     return []byte(stamp), nil
 }
@@ -40,7 +40,7 @@ type Data struct {
     Name     string   `json:"name"`
     Status   int      `json:"status"`
     Desc     string   `json:"desc"`
-    GTime    JsonTime `json:"time"`
+    GTime    JSONTime `json:"time"`
     Data     string   `json:"data"`
     GType    int      `json:"type"`
     DataList []*Data  `json:"dataList"`
@@ -52,7 +52,7 @@ func NewData(d *data.AnalyseData) *Data {
         Name:   d.Name,
         Status: int(d.Status),
         Desc:   d.Desc,
-        GTime:  JsonTime(d.Timestamp),
+        GTime:  JSONTime(d.Timestamp),
     }
     if d.Data != nil {
         renderData.Data = d.Data.Data

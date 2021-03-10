@@ -16,6 +16,8 @@ const (
 )
 
 type Interface interface {
+    Class() data.Type
+    Data() string
     ToMarkdown() string
 }
 
@@ -28,7 +30,7 @@ func (m Markdown) Class() data.Type {
 }
 
 func (m Markdown) Data() string {
-    return m.Interface.ToMarkdown()
+    return m.ToMarkdown()
 }
 
 // Content simple context
@@ -95,6 +97,7 @@ func (m *Content) ToMarkdown() string {
 
 // Table table format
 type Table struct {
+    Markdown
     col     int
     desc    string
     head    []string
@@ -102,7 +105,9 @@ type Table struct {
 }
 
 func NewTable(head ...string) *Table {
-    return &Table{head: head, col: len(head), content: [][]string{}}
+    t := &Table{head: head, col: len(head), content: [][]string{}}
+    t.Markdown.Interface = t
+    return t
 }
 
 func (t *Table) WithDesc(desc string) *Table {
@@ -151,12 +156,15 @@ func (t *Table) ToMarkdown() string {
 
 // List Markdown 列表
 type List struct {
+    Markdown
     list   []string
     length int
 }
 
 func NewList(list ...string) *List {
-    return &List{list: list}
+    l := &List{list: list}
+    l.Markdown.Interface = l
+    return l
 }
 
 func NewListFromContent(contents ...Markdown) *List {

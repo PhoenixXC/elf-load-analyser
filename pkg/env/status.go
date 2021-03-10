@@ -1,7 +1,7 @@
 package env
 
 import (
-    _ "embed"
+    _ "embed" // embed for banner.txt
     "encoding/json"
     "fmt"
     "github.com/phoenixxc/elf-load-analyser/pkg/helper"

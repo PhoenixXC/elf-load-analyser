@@ -1,7 +1,7 @@
 package module
 
 import (
-    _ "embed"
+    _ "embed" // for embed bcc source
     "fmt"
     bpf "github.com/iovisor/gobpf/bcc"
     "github.com/phoenixxc/elf-load-analyser/pkg/bcc"

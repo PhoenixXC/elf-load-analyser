@@ -1,7 +1,7 @@
 package module
 
 import (
-    _ "embed"
+    _ "embed" // for embed bcc source
     "fmt"
     "github.com/phoenixxc/elf-load-analyser/pkg/bcc"
     "github.com/phoenixxc/elf-load-analyser/pkg/data"
@@ -14,7 +14,7 @@ import (
 var doExecveatCommonSource string
 
 const (
-    monitorName = "hook_execveat"
+    monitorName = "do_execveat_common"
 )
 
 type execveatComEvent struct {
@@ -26,8 +26,12 @@ type execveatComEvent struct {
 
 func (e execveatComEvent) Render() *data.AnalyseData {
     s := data.TrimBytes2Str(e.Filename[:])
-    msg := fmt.Sprintf("fd = %d, flags = %d, filename = %s", e.Fd, e.Flags, s)
-    return data.NewAnalyseData(monitorName, markdown.NewTextContent(msg))
+    var msg = markdown.NewList(
+        fmt.Sprintf("fd = %d", e.Fd),
+        fmt.Sprintf("flags = %d", e.Flags),
+        fmt.Sprintf("filename = %s", s),
+    )
+    return data.NewAnalyseData(monitorName, msg)
 }
 
 type doExecveatCommon struct {

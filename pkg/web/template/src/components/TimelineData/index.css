@@ -44,6 +44,11 @@ ul.rs-timeline {
   font-size: 80%;
 }
 
+.rs-timeline-endless .rs-timeline-item:last-child .rs-timeline-item-tail {
+  height: auto;
+  min-height: 80px;
+}
+
 .footer {
   margin-bottom: 30px;
 }

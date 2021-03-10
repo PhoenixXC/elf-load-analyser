@@ -1,7 +1,7 @@
 package module
 
 import (
-    _ "embed"
+    _ "embed" // for embed bcc source
     "fmt"
     "github.com/phoenixxc/elf-load-analyser/pkg/bcc"
     "github.com/phoenixxc/elf-load-analyser/pkg/data"

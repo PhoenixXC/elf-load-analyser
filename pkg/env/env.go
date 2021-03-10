@@ -80,8 +80,5 @@ func extraKernelVersion() {
 }
 
 func equalCharFunc(r rune) bool {
-    if r == '=' {
-        return true
-    }
-    return false
+    return r == '='
 }
