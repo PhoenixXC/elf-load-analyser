@@ -16,7 +16,7 @@ type sysExecveEvent struct {
 }
 
 func (e sysExecveEvent) Render() *data.AnalyseData {
-    return data.NewAnalyseData("syscall:execve", markdown.NewTextContent("start call"))
+    return data.NewAnalyseData("", markdown.NewTextContent("start call"))
 }
 
 type sysExecveRetEvent struct {
@@ -25,11 +25,10 @@ type sysExecveRetEvent struct {
 }
 
 func (s sysExecveRetEvent) Render() *data.AnalyseData {
-    item := "syscall:execve"
     if s.Ret != 0 {
-        return data.NewErrAnalyseData(item, data.RuntimeError, fmt.Sprintf("execve failed, return %d", s.Ret))
+        return data.NewErrAnalyseData("", data.RuntimeError, fmt.Sprintf("execve failed, return %d", s.Ret))
     }
-    return data.NewAnalyseData(item, markdown.NewTextContent("execve success"))
+    return data.NewAnalyseData("", markdown.NewTextContent("execve success"))
 }
 
 //go:embed src/execve.cpp.k
@@ -40,12 +39,12 @@ type sysExecve struct {
 }
 
 func init() {
-    entry := "call_events"
+    entry := "call_event"
     m := modules.NewPerfResolveMonitorModule(&sysExecve{})
     m.RegisterOnceTable(entry, func(d []byte) (*data.AnalyseData, error) {
         return modules.Render(d, &sysExecveEvent{}, true)
     })
-    m.RegisterOnceTable("ret_events", func(d []byte) (*data.AnalyseData, error) {
+    m.RegisterOnceTable("ret_event", func(d []byte) (*data.AnalyseData, error) {
         return modules.Render(d, &sysExecveRetEvent{}, true)
     })
     m.SetMark(entry, enhance.StartMark)

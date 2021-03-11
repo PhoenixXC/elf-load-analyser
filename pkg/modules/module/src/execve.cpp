@@ -12,8 +12,8 @@ TDATA(ret_sys_execve,
 
 TDATA(call_sys_execve, TEMPTY);
 
-BPF_PERF_OUTPUT(call_events);
-BPF_PERF_OUTPUT(ret_events);
+BPF_PERF_OUTPUT(call_event);
+BPF_PERF_OUTPUT(ret_event);
 
 int syscall__execve(struct pt_regs *ctx, const char __user *filename,
                     const char __user *const __user *__argv,
@@ -24,7 +24,7 @@ int syscall__execve(struct pt_regs *ctx, const char __user *filename,
     struct call_sys_execve e = {};
     init_tdata(&e);
     bpf_trace_printk("call_syscall_execve => ns: %llu\n", e.ts); 
-    call_events.perf_submit(ctx, &e, sizeof(struct call_sys_execve));
+    call_event.perf_submit(ctx, &e, sizeof(struct call_sys_execve));
     return 0;
 }
 int do_ret_sys_execve(struct pt_regs *ctx) {
@@ -35,7 +35,7 @@ int do_ret_sys_execve(struct pt_regs *ctx) {
     struct ret_sys_execve e = {};
     init_tdata(&e);
     bpf_probe_read_kernel(&e.ret, sizeof(e.ret), (void *)&retval);
-    ret_events.perf_submit(ctx, &e, sizeof(struct ret_sys_execve));
+    ret_event.perf_submit(ctx, &e, sizeof(struct ret_sys_execve));
 
     return 0;
 }

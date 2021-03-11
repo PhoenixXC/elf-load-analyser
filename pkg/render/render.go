@@ -36,23 +36,25 @@ func (t JSONTime) MarshalJSON() ([]byte, error) {
 }
 
 type Data struct {
-    ID       string   `json:"id"`
-    Name     string   `json:"name"`
-    Status   int      `json:"status"`
-    Desc     string   `json:"desc"`
-    GTime    JSONTime `json:"time"`
-    Data     string   `json:"data"`
-    GType    int      `json:"type"`
-    DataList []*Data  `json:"dataList"`
+    ID        string            `json:"id"`
+    Name      string            `json:"name"`
+    Status    int               `json:"status"`
+    Desc      string            `json:"desc"`
+    GTime     JSONTime          `json:"time"`
+    Data      string            `json:"data"`
+    GType     int               `json:"type"`
+    DataList  []*Data           `json:"dataList"`
+    ExtraData map[string]string `json:"extra"`
 }
 
 func NewData(d *data.AnalyseData) *Data {
     renderData := &Data{
-        ID:     d.ID,
-        Name:   d.Name,
-        Status: int(d.Status),
-        Desc:   d.Desc,
-        GTime:  JSONTime(d.Timestamp),
+        ID:        d.ID,
+        Name:      d.Name,
+        Status:    int(d.Status),
+        Desc:      d.Desc,
+        GTime:     JSONTime(d.Timestamp),
+        ExtraData: d.Extra,
     }
     if d.Data != nil {
         renderData.Data = d.Data.Data

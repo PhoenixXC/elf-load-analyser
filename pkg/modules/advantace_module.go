@@ -7,25 +7,27 @@ import (
     "github.com/phoenixxc/elf-load-analyser/pkg/log"
     "reflect"
     "strings"
+    "sync"
 )
 
-var registeredEnhancer = make(map[string]EnhanceHandler)
+var (
+    mutex              sync.Once
+    registeredEnhancer = make(map[string]Enhancer)
+)
 
-func RegisteredEnhancer(name string, e EnhanceHandler) {
+func RegisteredEnhancer(name string, e Enhancer) {
     registeredEnhancer[name] = e
 }
 
 // TableCtx table context
 type TableCtx struct {
-    name    string
+    Name    string
+    Monitor MonitorModule
+
     loop    bool
     channel chan []byte
     handler func(data []byte) (*data.AnalyseData, error)
     mark    map[string]struct{}
-}
-
-func (t *TableCtx) Name() string {
-    return t.name
 }
 
 func (t *TableCtx) IsMark(mk string) bool {
@@ -33,8 +35,8 @@ func (t *TableCtx) IsMark(mk string) bool {
     return ok
 }
 
-// EnhanceHandler enhance on PerfResolveMonitorModule.Resolve
-type EnhanceHandler interface {
+// Enhancer enhance on PerfResolveMonitorModule.Resolve
+type Enhancer interface {
     PreHandle(tCtx *TableCtx)
     AfterHandle(tCtx *TableCtx, aData *data.AnalyseData, err error) (*data.AnalyseData, error)
 }
@@ -56,23 +58,33 @@ func NewPerfResolveMonitorModule(m MonitorModule) *PerfResolveMonitorModule {
     }
 }
 
-func (p *PerfResolveMonitorModule) RegisterOnceTable(name string, handler func(data []byte) (*data.AnalyseData, error)) {
+// RegisterOnceTable 注册 table，仅执行一次操作
+func (p *PerfResolveMonitorModule) RegisterOnceTable(name string,
+    handler func(data []byte) (*data.AnalyseData, error)) {
     p.RegisterTable(name, false, handler)
 }
 
-func (p *PerfResolveMonitorModule) RegisterTable(name string, loop bool, handler func(data []byte) (*data.AnalyseData, error)) {
+// RegisterTable 注册 table, 若 loop 为 true，返回对应的 chan，否则返回 nil
+func (p *PerfResolveMonitorModule) RegisterTable(name string, loop bool,
+    handler func(data []byte) (*data.AnalyseData, error)) chan<- []byte {
     name = strings.TrimSpace(name)
     if handler == nil || len(name) == 0 {
-        return
+        return nil
     }
+    tableChannel := make(chan []byte)
     p.tableIds = append(p.tableIds, name)
     p.table2Ctx[name] = &TableCtx{
-        name:    fmt.Sprintf("%s@%s", p.Monitor(), name),
+        Name:    fmt.Sprintf("%s@%s", p.Monitor(), name),
         loop:    loop,
-        channel: make(chan []byte),
+        channel: tableChannel,
         handler: handler,
         mark:    map[string]struct{}{},
+        Monitor: p,
     }
+    if !loop {
+        return nil
+    }
+    return tableChannel
 }
 
 func (p *PerfResolveMonitorModule) RegisterStopHandle(handler func(p *PerfResolveMonitorModule)) {
@@ -91,6 +103,22 @@ func (p *PerfResolveMonitorModule) SetMark(name string, mk string) *PerfResolveM
 //nolint:funlen
 func (p *PerfResolveMonitorModule) Resolve(m *bpf.Module, ch chan<- *data.AnalyseData,
     ready chan<- struct{}, stop <-chan struct{}) {
+
+    if log.ConfigLevel() == log.DLevel {
+        mutex.Do(func() {
+            l := len(registeredEnhancer)
+            if l == 0 {
+                return
+            }
+            enhancers, idx := make([]string, l), 0
+            for s := range registeredEnhancer {
+                enhancers[idx] = s
+                idx++
+            }
+            log.Debugf("Enhancer %v be registered", enhancers)
+        })
+    }
+
     if len(p.tableIds) == 0 {
         return
     }
@@ -146,22 +174,25 @@ func (p *PerfResolveMonitorModule) Resolve(m *bpf.Module, ch chan<- *data.Analys
 
 func dataProcessing(d []byte, ctx *TableCtx, ch chan<- *data.AnalyseData) {
     for name, handler := range registeredEnhancer {
-        log.Debugf("%s pre handle for %q", name, ctx.name)
+        log.Debugf("%s pre handle for %q", name, ctx.Name)
         handler.PreHandle(ctx)
     }
 
-    log.Infof("Resolve %q...", ctx.name)
+    log.Infof("Resolve %q...", ctx.Name)
     analyseData, err := ctx.handler(d)
-    log.Debugf("Receive data from %q, %v", ctx.name, analyseData)
+    log.Debugf("Receive data from %q, %v", ctx.Name, analyseData)
 
     for name, handler := range registeredEnhancer {
-        log.Debugf("%s after handle for %q", name, ctx.name)
+        log.Debugf("%s after handle for %q", name, ctx.Name)
         analyseData, err = handler.AfterHandle(ctx, analyseData, err)
     }
 
     if err != nil {
-        log.Warnf("Event %q resolve error: %v", ctx.name, err)
+        log.Warnf("Event %q resolve error: %v", ctx.Name, err)
     } else {
+        if len(analyseData.Name) == 0 {
+            analyseData.Name = ctx.Name
+        }
         ch <- analyseData
     }
 }

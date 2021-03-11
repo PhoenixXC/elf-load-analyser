@@ -9,7 +9,7 @@ TDATA(exec_event,
     int flags;
     char filename[256];
 ); 
-BPF_PERF_OUTPUT(events);
+BPF_PERF_OUTPUT(call_event);
 
 int kprobe__do_execveat_common(struct pt_regs* ctx, int fd,
                                struct filename* filename, int flags) {
@@ -27,6 +27,6 @@ int kprobe__do_execveat_common(struct pt_regs* ctx, int fd,
     bpf_probe_read_kernel(&(event.flags), sizeof(int), (void*)&flags);
     bpf_probe_read_kernel_str(&(event.filename), sizeof(event.filename),
                               (void*)filename->name);
-    events.perf_submit((void*)ctx, &event, sizeof(struct exec_event));
+    call_event.perf_submit((void*)ctx, &event, sizeof(struct exec_event));
     return 0;
 }

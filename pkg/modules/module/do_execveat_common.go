@@ -13,10 +13,6 @@ import (
 //go:embed src/do_execveat_common.cpp.k
 var doExecveatCommonSource string
 
-const (
-    monitorName = "do_execveat_common"
-)
-
 type execveatComEvent struct {
     enhance.TimeEventResult
     Fd       int32
@@ -31,7 +27,7 @@ func (e execveatComEvent) Render() *data.AnalyseData {
         fmt.Sprintf("flags = %d", e.Flags),
         fmt.Sprintf("filename = %s", s),
     )
-    return data.NewAnalyseData(monitorName, msg)
+    return data.NewAnalyseData("", msg)
 }
 
 type doExecveatCommon struct {
@@ -40,14 +36,14 @@ type doExecveatCommon struct {
 
 func init() {
     m := modules.NewPerfResolveMonitorModule(&doExecveatCommon{})
-    m.RegisterOnceTable("events", func(data []byte) (*data.AnalyseData, error) {
+    m.RegisterOnceTable("call_event", func(data []byte) (*data.AnalyseData, error) {
         return modules.Render(data, &execveatComEvent{}, true)
     })
     modules.ModuleDefaultInit(m)
 }
 
 func (c *doExecveatCommon) Monitor() string {
-    return "hook_execveat"
+    return "execveat"
 }
 
 func (c *doExecveatCommon) Source() string {

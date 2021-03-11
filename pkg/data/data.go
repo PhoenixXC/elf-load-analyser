@@ -49,7 +49,7 @@ type AnalyseData struct {
     Timestamp time.Time
     Data      *Data
     DataList  []*AnalyseData
-    extra     map[string]string
+    Extra     map[string]string
 }
 
 func (a *AnalyseData) DataStr() string {
@@ -59,9 +59,12 @@ func (a *AnalyseData) DataStr() string {
     return a.Data.Data
 }
 
+// NewAnalyseData create analyse data.
+// name: data name, if name == "" and use advantage_module, will be set `monitor name`@`event name` after rendered;
+// builder: cannot be null
 func NewAnalyseData(name string, builder Builder) *AnalyseData {
     return &AnalyseData{Name: name, Status: Success, Data: newData(builder), Desc: statusDesc(Success),
-        Timestamp: time.Now(), extra: map[string]string{}}
+        Timestamp: time.Now(), Extra: map[string]string{}}
 }
 
 func NewListAnalyseData(id string, name string, dataList []*AnalyseData) *AnalyseData {
@@ -72,7 +75,7 @@ func NewListAnalyseData(id string, name string, dataList []*AnalyseData) *Analys
         DataList:  dataList,
         Desc:      statusDesc(Success),
         Timestamp: time.Now(),
-        extra:     map[string]string{},
+        Extra:     map[string]string{},
     }
 }
 
@@ -83,7 +86,7 @@ func NewErrAnalyseData(name string, s Status, desc string) *AnalyseData {
     if len(desc) == 0 {
         desc = statusDesc(s)
     }
-    return &AnalyseData{Status: s, Desc: desc, Timestamp: time.Now(), Name: name, extra: map[string]string{}}
+    return &AnalyseData{Status: s, Desc: desc, Timestamp: time.Now(), Name: name, Extra: map[string]string{}}
 }
 
 func (a *AnalyseData) WithID(id string) *AnalyseData {
@@ -91,12 +94,16 @@ func (a *AnalyseData) WithID(id string) *AnalyseData {
     return a
 }
 
-func (a *AnalyseData) PutExtra(k string, v string) {
-    a.extra[k] = v
+func (a *AnalyseData) RmExtra(k string) {
+    delete(a.Extra, k)
 }
 
-func (a *AnalyseData) Extra(k string) (string, bool) {
-    v, ok := a.extra[k]
+func (a *AnalyseData) PutExtra(k string, v string) {
+    a.Extra[k] = v
+}
+
+func (a *AnalyseData) ExtraByKey(k string) (string, bool) {
+    v, ok := a.Extra[k]
     return v, ok
 }
 
