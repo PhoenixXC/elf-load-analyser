@@ -3,6 +3,7 @@ package modules
 import (
     "bytes"
     "encoding/binary"
+    "errors"
     "fmt"
     bpf "github.com/iovisor/gobpf/bcc"
     "github.com/phoenixxc/elf-load-analyser/pkg/bcc"
@@ -65,7 +66,7 @@ func ModuleInit(mm MonitorModule, end bool) {
 func Render(d []byte, event EventResult, enhance bool) (*data.AnalyseData, error) {
     err := binary.Read(bytes.NewBuffer(d), bpf.GetHostByteOrder(), event)
     if err != nil {
-        return nil, fmt.Errorf("Failed to decode received data to %q, %w\n",
+        return nil, fmt.Errorf("Failed to decode received data to %q, %v\n",
             reflect.TypeOf(event).Name(), err)
     }
     aData := event.Render()
@@ -92,6 +93,9 @@ func parseField(v reflect.Value, d *data.AnalyseData) {
     for i := 0; i < v.NumField(); i++ {
         structField := v.Type().Field(i)
         k := v.Field(i)
+        if !k.CanInterface() {
+            continue
+        }
         tag := structField.Tag
         label := tag.Get(EnhanceTag)
         if label == "" {
@@ -100,13 +104,16 @@ func parseField(v reflect.Value, d *data.AnalyseData) {
             }
             continue
         }
-        d.PutExtra(label, toString(k))
+        s, err := toString(k)
+        if err == nil {
+            d.PutExtra(label, s)
+        } else {
+            log.Warnf("Parse field(%q) error: %v", k.Type().Name, err)
+        }
     }
 }
 
-func toString(value reflect.Value) string {
-    var key string
-
+func toString(value reflect.Value) (key string, err error) {
     switch value.Type().Kind() {
     case reflect.Float64:
         key = strconv.FormatFloat(value.Float(), 'f', -1, 64)
@@ -134,13 +141,16 @@ func toString(value reflect.Value) string {
         key = strconv.FormatUint(value.Uint(), 10)
     case reflect.String:
         key = value.String()
-    case reflect.Slice:
-        key = string(value.Bytes())
-    case reflect.Array:
-        key = string(value.Slice(0, value.Len()).Bytes())
+    case reflect.Interface:
+        i := value.Interface()
+        if si, ok := i.(fmt.Stringer); ok {
+            key = si.String()
+        } else {
+            err = errors.New(fmt.Sprintf("Unsupported interface type: %q\n", value.Type().Name()))
+        }
     default:
-        log.Errorf("Unsupported type %q", value.Type().Name())
+        err = errors.New(fmt.Sprintf("Unsupported type %q\n", value.Type().Name()))
     }
 
-    return key
+    return
 }

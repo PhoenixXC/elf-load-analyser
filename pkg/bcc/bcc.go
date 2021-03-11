@@ -82,6 +82,8 @@ func (m *Monitor) AddEvent(event *Event) *Monitor {
 func (m *Monitor) DoAction() (*bpf.Module, bool) {
     module := m.initialize()
     for event, action := range m.event2Action {
+        log.Debugf("%s@%s#%s start load/attach action...", m.Name, event.FnName, event.Name)
+
         action := *action
         fd, err := action.Load(module)
         if err != nil {
