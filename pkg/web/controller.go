@@ -1,13 +1,14 @@
 package web
 
 import (
+    "errors"
     "github.com/phoenixxc/elf-load-analyser/pkg/data"
     "github.com/phoenixxc/elf-load-analyser/pkg/log"
     "github.com/phoenixxc/elf-load-analyser/pkg/render"
     "net"
     "net/http"
     "strconv"
-    "time"
+    "syscall"
 )
 
 var (
@@ -22,22 +23,28 @@ func VisualAnalyseData(p *data.Pool, port uint) {
 
 func startWebService(d []*render.Data, port uint) {
     analyseDataCenter = d
+    http.Handle("/", FrontedService())
+    http.HandleFunc("/api/report", AnalyseReportService)
 
+    // 程序的主流程，若定义的端口被占用，使用随机端口
+MAIN:
     addr, err := getAnyFreeAddr(port)
     if err != nil {
         log.Errorf("Cannot select port to start wev server: %v", err)
     }
-    go func() {
-        // NOTE sleep to boot http serve boot finish
-        time.Sleep(10 * time.Millisecond)
-        log.Infof(log.Emphasize("Start web service on %s, click to view Analyse Report"), "http://"+addr)
-    }()
 
-    http.Handle("/", FrontedService())
-    http.HandleFunc("/api/report", AnalyseReportService)
+    log.Infof(log.Emphasize("Try to start wev server on %s, "+
+        "you can view analysis report through this link if the startup is successful"), "http://"+addr)
     err = http.ListenAndServe(addr, nil)
     if err != nil {
-        log.Errorf("Start web service failed, %v", err)
+        errType := syscall.EADDRINUSE
+        if port != 0 && errors.Is(err, errType) {
+            log.Warnf("Failed to start web service on defined port: %d, %v", port, err)
+            log.Warn("Retry use random port...")
+            port = 0
+            goto MAIN
+        }
+        log.Errorf("Failed to start web service, %v", err)
     }
 }
 
@@ -50,7 +57,7 @@ func getAnyFreeAddr(port uint) (string, error) {
     var addr *net.TCPAddr
     var err error
 
-    if addr, err = net.ResolveTCPAddr("tcp", "0.0.0.0:0"); err != nil {
+    if addr, err = net.ResolveTCPAddr("tcp", "0.0.0.0:0"); err == nil {
         listener, err = net.ListenTCP("tcp", addr)
     }
     if err != nil {
@@ -66,5 +73,5 @@ func getAnyFreeAddr(port uint) (string, error) {
             log.Errorf("Release random port error, %v", e)
         }
     }()
-    return listener.Addr().(*net.TCPAddr).String(), nil
+    return "0.0.0.0:" + strconv.Itoa(listener.Addr().(*net.TCPAddr).Port), nil
 }
