@@ -42,16 +42,30 @@ table {
   min-width: 100%;
   table-layout: fixed;
   overflow-x: auto;
+  overflow-y: auto;
+  max-height: 500px;
   display: block;
+  margin-bottom: 10px;
 }
 
 thead tr th {
   color: #6c6c6c;
 }
 
-thead tr {
-  /* -webkit-box-shadow: 3px 0 5px rgb(9 9 9 / 8%); */
-  box-shadow: 0 4px 5px -2px rgba(9, 9, 9, 0.08);
+thead tr > th {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  background: white;
+  box-shadow: 0 3px 0 0 #7a8fde;
+}
+
+tr > th:first-child {
+  z-index: 3;
+}
+
+tbody > tr:last-child {
+  border-bottom: unset !important;
 }
 
 tr {
@@ -94,27 +108,27 @@ small::before {
 }
 
 /* Scrollbar */
-table::-webkit-scrollbar {
+*::-webkit-scrollbar {
   width: 4px;
   height: 4px;
 }
 
-table::-webkit-scrollbar-track {
-  background: #f6f6f6;
+*::-webkit-scrollbar-track {
+  background: #ffffff;
   border-radius: 2px;
 }
 
-table::-webkit-scrollbar-thumb {
-  background: #aaa;
+*::-webkit-scrollbar-thumb {
+  background: #e8e8e8;
   border-radius: 2px;
 }
 
-table::-webkit-scrollbar-thumb:hover {
-  background: #747474;
+*::-webkit-scrollbar-thumb:hover {
+  background: #c6c6c6;
 }
 
-table::-webkit-scrollbar-corner {
-  background: #f6f6f6;
+*::-webkit-scrollbar-corner {
+  background: #ffffff;
 }
 
 /* Base */
