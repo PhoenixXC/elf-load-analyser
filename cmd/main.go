@@ -111,12 +111,12 @@ func treatingArgs(c *cmdArgs) {
     }
 
     // user check
-    c.uid, c.gid = getUidGid(c.user)
+    c.uid, c.gid = getUIDGid(c.user)
     // input output
     c.iFd, c.oFd, c.eFd = getIOFd(c.in, c.out, c.eOut)
 }
 
-func getUidGid(username string) (uid, gid int) {
+func getUIDGid(username string) (uid, gid int) {
     s := strings.TrimSpace(username)
     if len(s) != 0 {
         u, err := user.Lookup(s)

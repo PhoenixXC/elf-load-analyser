@@ -99,7 +99,7 @@ func (e *ElfRender) buildStaticData() markdown.Interface {
     return mk
 }
 
-func (e *ElfRender) buildDynamicData() markdown.Interface {
+func (e *ElfRender) buildDynamicData() markdown.Interface { //nolint:funlen
     dynInfo, err := xelf.BuildDynamicInfo(e.f)
     if err != nil {
         log.Warnf("Get static rel data from elf file failed: %v", err)
@@ -159,10 +159,7 @@ func (e *ElfRender) buildDynamicData() markdown.Interface {
         }
     }
 
-    mk.Append(symTableContent)
-    mk.Append(tag2DynContent)
-    mk.Append(importSymsContent)
-    mk.Append(relSecs)
+    mk.Append(symTableContent).Append(tag2DynContent).Append(importSymsContent).Append(relSecs)
     return mk
 }
 

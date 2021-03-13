@@ -45,7 +45,7 @@ func buildProcess(ctx *cmdArgs) int {
     }
     childEnvItem := fmt.Sprintf("%s=%s", ChildFlagEnv, ctx.path)
     childArgItem := fmt.Sprintf("%s=%s", ChildArgsFlag, strings.TrimSpace(execArgs))
-    childPID, err := syscall.ForkExec(args[0], args, &syscall.ProcAttr{
+    childPID, err := syscall.ForkExec(args[0], args, &syscall.ProcAttr{ //nolint:gosec
         Dir: pwd,
         Env: append(os.Environ(), childEnvItem, childArgItem),
         Sys: &syscall.SysProcAttr{

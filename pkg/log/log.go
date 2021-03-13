@@ -53,7 +53,7 @@ func SetConfigLevel(l string) error {
     case "error":
         currentLevel = ELevel
     default:
-        return fmt.Errorf("\nInvalid log level %q\n", l)
+        return fmt.Errorf("invalid log level %q", l)
     }
     return nil
 }

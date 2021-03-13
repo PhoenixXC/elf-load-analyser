@@ -101,9 +101,7 @@ func (p *PerfResolveMonitorModule) SetMark(name string, mk string) *PerfResolveM
 }
 
 //nolint:funlen
-func (p *PerfResolveMonitorModule) Resolve(m *bpf.Module, ch chan<- *data.AnalyseData,
-    ready chan<- struct{}, stop <-chan struct{}) {
-
+func (p *PerfResolveMonitorModule) Resolve(m *bpf.Module, ch chan<- *data.AnalyseData, ready chan<- struct{}, stop <-chan struct{}) {
     if log.ConfigLevel() == log.DLevel {
         mutex.Do(func() {
             l := len(registeredEnhancer)
