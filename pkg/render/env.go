@@ -16,12 +16,14 @@ func NewEnvRender() *EnvRender {
 
 func (e *EnvRender) Render() (*Data, error) {
     t := e.Type()
-    envContent := markdown.NewTitleContents(markdown.H3, "系统").WithContents(env.GetSysOS()).
-        Append(markdown.NewTitleContents(markdown.H3, "平台").WithContents(runtime.GOARCH)).
-        Append(markdown.NewTitleContents(markdown.H3, "环境变量").Append(markdown.NewList(os.Environ()...)))
+    envContent := markdown.NewTitleContents(markdown.H2, "内核").WithContents(env.GetKernelVersion()).
+        Append(markdown.NewTitleContents(markdown.H2, "平台").WithContents(runtime.GOARCH)).
+        Append(markdown.NewTitleContents(markdown.H2, "环境变量").Append(markdown.NewList(os.Environ()...)))
     return NewData(data.NewAnalyseData(t.Name, envContent).WithID(t.ID)), nil
 }
 
 func (e *EnvRender) Type() Type {
     return EnvType
 }
+
+func (e *EnvRender) Release() {}

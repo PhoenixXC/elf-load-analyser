@@ -26,6 +26,9 @@ var (
     errorLogger logger = newBaseLogger(ELevel, os.Stderr, "E ", defaultFlags).SetHandle(err)
 )
 
+// TODO
+//   - Get file, line use: `_, file, line, _ := runtime.Caller(0)`
+
 type logger interface {
     Level() Level
     Log(a interface{})

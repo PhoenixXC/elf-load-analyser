@@ -15,6 +15,9 @@ const (
     H4
 )
 
+// EmptyIf empty interface implement
+var EmptyIf = &Markdown{}
+
 type Interface interface {
     Class() data.Type
     Data() string
@@ -70,6 +73,9 @@ func (m *Content) WithContents(content ...string) *Content {
 }
 
 func (m *Content) Append(am Interface) *Content {
+    if am == EmptyIf {
+        return m
+    }
     m.appendContent = append(m.appendContent, am.ToMarkdown())
     return m
 }
@@ -102,6 +108,10 @@ type Table struct {
     desc    string
     head    []string
     content [][]string
+}
+
+func (t *Table) Col() int {
+    return t.col
 }
 
 func NewTable(head ...string) *Table {
@@ -167,11 +177,14 @@ func NewList(list ...string) *List {
     return l
 }
 
-func NewListFromContent(contents ...Markdown) *List {
+func NewListFromContent(contents ...Interface) *List {
     l, conLen := &List{}, len(contents)
     l.list = make([]string, conLen)
     l.length = conLen*3 + 2
     for _, content := range contents {
+        if content == EmptyIf {
+            continue
+        }
         c := content.ToMarkdown()
         l.length += len(c)
         l.list = append(l.list, c)

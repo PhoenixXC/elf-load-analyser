@@ -3,7 +3,6 @@ package modules
 import (
     "bytes"
     "encoding/binary"
-    "errors"
     "fmt"
     bpf "github.com/iovisor/gobpf/bcc"
     "github.com/phoenixxc/elf-load-analyser/pkg/bcc"
@@ -66,7 +65,7 @@ func ModuleInit(mm MonitorModule, end bool) {
 func Render(d []byte, event EventResult, enhance bool) (*data.AnalyseData, error) {
     err := binary.Read(bytes.NewBuffer(d), bpf.GetHostByteOrder(), event)
     if err != nil {
-        return nil, fmt.Errorf("Failed to decode received data to %q, %v\n",
+        return nil, fmt.Errorf("failed to decode received data to %q, %w",
             reflect.TypeOf(event).Name(), err)
     }
     aData := event.Render()
@@ -146,10 +145,10 @@ func toString(value reflect.Value) (key string, err error) {
         if si, ok := i.(fmt.Stringer); ok {
             key = si.String()
         } else {
-            err = errors.New(fmt.Sprintf("Unsupported interface type: %q\n", value.Type().Name()))
+            err = fmt.Errorf("unsupported interface type: %q", value.Type().Name())
         }
     default:
-        err = errors.New(fmt.Sprintf("Unsupported type %q\n", value.Type().Name()))
+        err = fmt.Errorf("unsupported type: %q", value.Type().Name())
     }
 
     return

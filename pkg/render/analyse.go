@@ -20,3 +20,5 @@ func (a AnalyseRender) Render() (*Data, error) {
 func (a AnalyseRender) Type() Type {
     return AnalyseType
 }
+
+func (a AnalyseRender) Release() {}

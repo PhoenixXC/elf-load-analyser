@@ -11,10 +11,10 @@ var dataCenter = make([]*Data, 3)
 
 func PreAnalyse(ctx Content) {
     // env
-    d, _ := NewEnvRender().Render()
+    d, _ := doRender(NewEnvRender())
     dataCenter[0] = d
     // elf
-    d, e := NewElfRender(ctx.Filepath).Render()
+    elfRender, e := NewElfRender(ctx.Filepath)
     if e != nil {
         var formatErr *elf.FormatError
         if ok := errors.As(e, &formatErr); ok {
@@ -23,12 +23,13 @@ func PreAnalyse(ctx Content) {
             log.Errorf("Analyse target binary format error, %v", e)
         }
     }
+    d, _ = doRender(elfRender)
     dataCenter[1] = d
 }
 
 func DoAnalyse(p *data.Pool) []*Data {
-    render := NewAnalyseRender(p.Data())
-    if d, err := render.Render(); err != nil {
+    d, err := doRender(NewAnalyseRender(p.Data()))
+    if err != nil {
         log.Errorf("Render analyse data error, %v", err)
     } else {
         dataCenter[2] = d

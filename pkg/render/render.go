@@ -20,6 +20,13 @@ var (
 type Render interface {
     Render() (*Data, error)
     Type() Type
+    Release()
+}
+
+func doRender(r Render) (d *Data, e error) {
+    d, e = r.Render()
+    r.Release()
+    return
 }
 
 type Content struct {

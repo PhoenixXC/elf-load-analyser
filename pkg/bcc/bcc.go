@@ -8,10 +8,24 @@ import (
     "strings"
 )
 
+type Type uint8
+
 const (
-    KprobesEvent    = 1 << iota // kprobes
-    KretprobesEvent             // kretprobes
+    KprobesType    = Type(iota) // kprobes
+    KretprobesType              // kretprobes
 )
+
+func (t Type) String() (name string) {
+    switch t {
+    case KprobesType:
+        name = "kprobe"
+    case KretprobesType:
+        name = "kretprobe"
+    default:
+        name = "unknown"
+    }
+    return
+}
 
 type Context struct {
     Pid int
@@ -26,12 +40,12 @@ type action interface {
 
 type Event struct {
     action
-    Class  int    // 事件类型
+    Class  Type   // 事件类型
     Name   string // 事件名称
     FnName string // 函数名称
 }
 
-func NewEvent(class int, name string, fnName string) *Event {
+func NewEvent(class Type, name string, fnName string) *Event {
     return &Event{Class: class, Name: name, FnName: fnName}
 }
 

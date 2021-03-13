@@ -14,6 +14,10 @@ const (
     ChildArgsFlag = "_ARGS_51cee58d2009745b72acb79005a881e4"
 )
 
+// TODO
+//  - 子进程挂掉结束程序，心跳否
+//  - 进程启动后监控子进程堆栈、动态链接记录
+
 func childProcess(execPath string) {
     // wait until parent load bcc modules ok
     startSignals := make(chan os.Signal, 1)

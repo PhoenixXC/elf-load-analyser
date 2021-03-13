@@ -1,7 +1,9 @@
 package data
 
 import (
+    "fmt"
     "github.com/phoenixxc/elf-load-analyser/pkg/log"
+    "strings"
     "time"
 )
 
@@ -34,6 +36,10 @@ type Data struct {
     Data  string `json:"data"`
 }
 
+func (d Data) String() string {
+    return fmt.Sprintf("Data{Class: %d, Data: %s}", d.Class, strings.TrimSpace(d.Data))
+}
+
 func newData(b Builder) *Data {
     return &Data{
         Class: b.Class(),
@@ -50,6 +56,12 @@ type AnalyseData struct {
     Data      *Data
     DataList  []*AnalyseData
     Extra     map[string]string
+}
+
+func (a AnalyseData) String() string {
+    return fmt.Sprintf("AnalyseData{ID: %s, Name: %s, Status: %s, Desc: %s, "+
+        "Timestamp: %v, Data: %v, DataList: %v, Extra: %v}", a.ID, a.Name, statusDesc(a.Status), a.Desc,
+        a.Timestamp, a.Data, a.DataList, a.Extra)
 }
 
 func (a *AnalyseData) DataStr() string {

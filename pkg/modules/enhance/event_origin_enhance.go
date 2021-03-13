@@ -33,9 +33,11 @@ func (e eventOriginEnhancer) AfterHandle(tCtx *modules.TableCtx,
     }
     var buffer bytes.Buffer
     events := tCtx.Monitor.Events()
-    for _, event := range events {
-        buffer.WriteString(fmt.Sprintf("%d|%s|%s", event.Class, event.FnName, event.Name))
-        buffer.WriteRune('@')
+    for i, event := range events {
+        if i > 0 {
+            buffer.WriteRune('@')
+        }
+        buffer.WriteString(fmt.Sprintf("%v|%s|%s", event.Class, event.FnName, event.Name))
     }
     serializeEvents := buffer.String()
 
